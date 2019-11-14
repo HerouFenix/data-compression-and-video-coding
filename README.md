@@ -1,9 +1,5 @@
-# data-compression-and-video-coding
-Repo for the Compression and Video Coding Project, implemented both in Python and C++, for the CSLP Class
-
-
 # Data Compression and Video Encoding in Python and C++ | UA 2019/2020
-# https://github.com/HerouFenix/image-processing-using-c
+## https://github.com/HerouFenix/data-compression-and-video-coding/blob/master/README.md
 
 ## Authors
 
