@@ -40,7 +40,7 @@ public:
 
         if (value > file_size)
         {
-            cout << "Error. Can't have an offset bigger than the file's size";
+            cout << "Error. Can't have an offset bigger than the file's size\n";
             return 0;
         }
         bit_offset = value;
@@ -77,7 +77,7 @@ public:
         //Verify that the number of bits is correct
         if (no_of_bits < 0)
         {
-            cout << "Invalid number of bits. Values must be positive";
+            cout << "Invalid number of bits. Values must be positive\n";
             return NULL;
         }
 
@@ -92,7 +92,7 @@ public:
                 cout << bit_offset << "\n";
                 cout << no_of_bits << "\n";
                 cout << "Total "<<no_of_bits+bit_offset<<"\n";
-                cout << "Error. Operation would cause an overflow (Tried to read more bits than the file has)";
+                cout << "Error. Operation would cause an overflow (Tried to read more bits than the file has)\n";
                 return 0;
             }
             int initial_offset = bit_offset;
@@ -132,14 +132,14 @@ public:
             }
             else
             {
-                cout << "File could not be found";
+                cout << "File could not be found\n";
             }
 
             loaded_file.close();
         }
         catch (exception &e)
         {
-            cout << "An exception occurred when reading from the given file. Exception  " << e.what();
+            cout << "An exception occurred when reading from the given file. Exception  " << e.what() << "\n";
         }
 
         return 0;
@@ -173,7 +173,7 @@ public:
         //Verify that the number of bits is correct
         if (no_of_bits < 0)
         {
-            cout << "Invalid number of bits. Values must be positive";
+            cout << "Invalid number of bits. Values must be positive\n";
             return 0;
         }
 
@@ -220,7 +220,7 @@ public:
         }
         catch (exception &e)
         {
-            cout << "An exception occurred when reading from the given file. Exception  " << e.what();
+            cout << "An exception occurred when reading from the given file. Exception  " << e.what() << "\n";
         }
 
         return 0;
@@ -237,17 +237,17 @@ public:
     }
 };
 
-/*
+
 int main()
 {
     BitStream *test_stream = new BitStream("../../a_love_story.txt");
-    cout << "First read through the 16 bits";
+    cout << "First read through the 16 bits\n";
     test_stream->read_bits(16);
     bool *oof = test_stream->get_bit_array();
-    cout << "Second read through the 16 bits";
+    cout << "Second read through the 16 bits\n";
     test_stream->read_bits(16, 0);
     bool *oof_2 = test_stream->get_bit_array();
-    cout << "Third read, getting the next 16 bits";
+    cout << "Third read, getting the next 16 bits\n";
     test_stream->read_bits(16);
     bool *oof_3 = test_stream->get_bit_array();
     for (int i = 0; i < 16; i++)
@@ -268,4 +268,3 @@ int main()
     test_stream->write_bits("../../a_poop_story_2.txt");
 
 }
-*/
