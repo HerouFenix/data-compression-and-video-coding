@@ -1,46 +1,190 @@
-class BitStream():
-    def __init__(self):
+import os
+
+
+class BitStream:
+    def __init__(self, file_path):
+        self.file_path = file_path
+        self.file_size = os.path.getsize(self.file_path)*8
+
         self.bit_array = []
 
-    def read_file(self, file_name, nbits=None):
-        if nbits is not None and nbits < 0:
-            print("Error: Invalid number of bits, nbits must be positive")
-            return False
-        with open(file_name, "r") as f:
-            num_chars = nbits//8 +1
-            info_read = f.read(num_chars) if nbits is not None else f.read()
-            counter = 0
-            for char in info_read:
-                print(format(ord(char), "b"))
-                for index in range(7,-1,-1):
-                   self.bit_array.append(bool((ord(char) >> index) & 1))
-                   counter+=1
-                   if nbits is not None and counter == nbits:
-                       return True
-        return False
-    
-    def write_file(self, file_name, nbits = None):
-        if nbits is not None and nbits < 0:
-            print("Error: Invalid number of bits, nbits must be positive")
-            return False
-        if nbits > len(self.bit_array):
-            print("Number of bits inputted greater than the number of bits stored")
-            return False
-        with open(file_name, "wb") as f:
-            num_bytes = nbits//8 + 1
-            char = 0
-            limit = nbits if nbits is not None else len(self.bit_array)
-            for counter in range(limit):
-                if counter %8 == 0 and counter != 0:
-                    f.write(bytes(chr(char), 'utf-8'))
-                    char = 0
-                char |= int(self.bit_array[counter]) << (7-(counter%8))
-            f.write(bytes(chr(char), 'utf-8'))
-            return True
-        return False
+        self.bit_offset = 0
 
-bts = BitStream()
-if bts.read_file("../../README.md",16):
-    print(bts.bit_array)
-if bts.write_file("../../test.bin", 16):
-    print("Written successful")
+    # GETTERS & RESETTERS #
+    def set_offset(self, value):
+        """
+        # Function used to set our offset counter to a given value
+        #
+        # @param value The value we want to change our offset to
+        """
+
+        if value > self.file_size:
+            print("Error. Can't have an offset bigger than the file's size\n")
+            return 0
+
+        self.bit_offset = value
+        return 1
+
+    def get_bit_array(self):
+        """
+        # Function used to return our current bit array
+        """
+        return self.bit_array
+
+    def get_file_size(self):
+        """
+        # Function used to get our current file's size
+        """
+        return file_size
+
+    # READ BITS #
+    def read_bits(self, no_of_bits, use_offset=True):
+        """
+        # Function used to read n bits from our file. Read values are put into our
+        # bit_array
+        #
+        # @param no_of_bits How many bits we want to read
+        # @param use_offset Control variable used to check whether we
+        # want to read from the beggining or starting at our current offset
+        """
+
+        # Verify that the number of bits is correct
+        if no_of_bits < 0:
+            print("Invalid number of bits. Values must be positive\n")
+            return None
+
+        bit_counter = 0  # Used to count how many bits we've read
+
+        try:
+            with open(self.file_path, "rb") as loaded_file:
+                if (use_offset and self.bit_offset + no_of_bits > self.file_size):
+                    print(
+                        "Error. Operation would cause an overflow (Tried to read more bits than the file has)\n")
+                    return 0
+
+                initial_offset = self.bit_offset
+                for control in range(int(self.file_size/8)):
+
+                    byte = ord(loaded_file.read(1))
+
+                    for i in range(7, -1, -1):
+                        if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
+                            return 1
+
+                        # Used to advance our file pointer until we catch up with our offset
+                        if use_offset and bit_counter < self.bit_offset:
+                            bit_counter += 1
+                            continue
+
+                        bit_counter += 1
+
+                        if use_offset:
+                            # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
+                            self.bit_array.append(((byte >> i) & 1) == 1)
+                            self.bit_offset += 1
+                        else:
+                            # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
+                            self.bit_array.append(((byte >> i) & 1) == 1)
+                            bit_counter += 1
+            return 1
+
+        except Exception as e:
+            print(
+                "An exception occurred when reading from the given file. Exception  ", e, "\n")
+
+        return 0
+
+    def read_bits(use_offset=True):
+        """
+        # Function used to read the entire file(or what's left of it if we have an offset)
+        #
+        # @param use_offset The value we want to change our offset to
+        """
+
+        if (use_offset):
+            return read_bits(self.file_size - self.bit_offset, use_offset)
+        return read_bits(self.file_size, use_offset)
+
+    # WRITE BITS #
+    def write_bits(self,file_path, no_of_bits):
+        """
+        # Function used to write our current bit_array into a file
+        #
+        # @param file_path The name of the file we want to write to
+        # @param no_of_bits The amount of bits we want to write
+        """
+
+        # Verify that the number of bits is correct
+        if (no_of_bits < 0):
+            print("Invalid number of bits. Values must be positive\n")
+            return 0
+
+        try:
+            with open(self.file_path, "wb") as file_writer:
+                remainder = no_of_bits % 8
+                bitstream 
+
+                for i in range(no_of_bits):
+                    bit = bit_array[i]
+
+                    bitstream |= bit << (7 - i % 8)
+
+                    if i % 8 == 0 and i != 0:
+                        write_file.write(bitstream)
+                        c = 0
+
+                i = remainder
+                for i in range (8):
+                    c |= 0 << (7 - i % 8)
+
+                file_writer.write(bitstream)
+                file_writer.close()
+
+                return 1
+        except Exception as e:
+            print(
+                "An exception occurred when reading from the given file. Exception  ", e, "\n")
+
+        return 0
+
+    def write_bits(self,file_path):
+        """
+        # Function used to write the entirety of our bit_array into a file
+        #
+        # @param file_path The name of the file we want to write to
+        """
+        return write_bits(file_path, bit_offset)
+
+
+
+def main():
+    test_stream = BitStream("../../a_love_story.txt")
+    print("First read through the 16 bits\n")
+
+    test_stream.read_bits(16)
+    oof = test_stream.get_bit_array()
+    print("Second read through the 16 bits\n")
+
+    test_stream.read_bits(16, 0)
+    oof_2 = test_stream.get_bit_array()
+    print("Third read, getting the next 16 bits\n")
+
+    test_stream.read_bits(16)
+    oof_3 = test_stream.get_bit_array()
+
+    for i in range(len(oof)):
+        print(int(oof[i]))
+        print(int(oof_2[i]))
+        print(int(oof_3[i]))
+
+    for i in oof_3:
+        print(int(i), end="")
+    print()
+    print(len(oof_3))
+
+    # test_stream.write_bits("../../a_poop_story.txt", 16)
+
+    # test_stream.write_bits("../../a_poop_story_2.txt")
+
+if __name__ == "__main__":
+    main()
