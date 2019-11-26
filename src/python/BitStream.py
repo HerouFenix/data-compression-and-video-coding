@@ -35,7 +35,7 @@ class BitStream:
         """
         # Function used to get our current file's size
         """
-        return file_size
+        return self.file_size
 
     # READ BITS #
     def read_bits(self, no_of_bits, use_offset=True):
@@ -63,7 +63,7 @@ class BitStream:
                     return 0
 
                 initial_offset = self.bit_offset
-                for control in range(int(self.file_size/8)):
+                for control in range(self.file_size//8):
 
                     byte = ord(loaded_file.read(1))
 
@@ -72,11 +72,9 @@ class BitStream:
                             return 1
 
                         # Used to advance our file pointer until we catch up with our offset
-                        if use_offset and bit_counter < self.bit_offset:
-                            bit_counter += 1
+                        bit_counter +=1
+                        if use_offset and bit_counter <= self.bit_offset:
                             continue
-
-                        bit_counter += 1
 
                         if use_offset:
                             # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
@@ -84,8 +82,7 @@ class BitStream:
                             self.bit_offset += 1
                         else:
                             # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
-                            self.bit_array.append(((byte >> i) & 1) == 1)
-                            bit_counter += 1
+                            self.bit_array[bit_counter-1] = ((byte >> i) & 1) == 1
             return 1
 
         except Exception as e:
@@ -94,7 +91,7 @@ class BitStream:
 
         return 0
 
-    def read_bits(use_offset=True):
+    def read_allbits(self,use_offset=True):
         """
         # Function used to read the entire file(or what's left of it if we have an offset)
         #
@@ -102,8 +99,8 @@ class BitStream:
         """
 
         if (use_offset):
-            return read_bits(self.file_size - self.bit_offset, use_offset)
-        return read_bits(self.file_size, use_offset)
+            return self.read_bits(self.file_size - self.bit_offset, use_offset)
+        return self.read_bits(self.file_size, use_offset)
 
     # WRITE BITS #
     def write_bits(self,file_path, no_of_bits):
@@ -120,40 +117,38 @@ class BitStream:
             return 0
 
         try:
-            with open(self.file_path, "wb") as file_writer:
+            with open(file_path, "wb") as file_writer:
                 remainder = no_of_bits % 8
-                bitstream 
+                bitstream = 0 
 
                 for i in range(no_of_bits):
-                    bit = bit_array[i]
+                    bit = self.bit_array[i]
 
-                    bitstream |= bit << (7 - i % 8)
+                    bitstream |= int(bit) << (7 - i % 8)
 
                     if i % 8 == 0 and i != 0:
-                        write_file.write(bitstream)
-                        c = 0
+                        file_writer.write(bitstream.to_bytes(1,"little"))
+                        bitstream = 0
 
-                i = remainder
-                for i in range (8):
-                    c |= 0 << (7 - i % 8)
+                if (remainder != 0):
+                    for i in range (remainder, 8):
+                        bitstream |= 0 << (7 - i % 8)
 
-                file_writer.write(bitstream)
-                file_writer.close()
-
-                return 1
+                file_writer.write(bitstream.to_bytes(1,"little"))
+            return 1
         except Exception as e:
             print(
                 "An exception occurred when reading from the given file. Exception  ", e, "\n")
 
         return 0
 
-    def write_bits(self,file_path):
+    def write_allbits(self,file_path):
         """
         # Function used to write the entirety of our bit_array into a file
         #
         # @param file_path The name of the file we want to write to
         """
-        return write_bits(file_path, bit_offset)
+        return self.write_bits(file_path, self.bit_offset)
 
 
 
@@ -165,7 +160,7 @@ def main():
     oof = test_stream.get_bit_array()
     print("Second read through the 16 bits\n")
 
-    test_stream.read_bits(16, 0)
+    test_stream.read_bits(16, False)
     oof_2 = test_stream.get_bit_array()
     print("Third read, getting the next 16 bits\n")
 
@@ -182,9 +177,9 @@ def main():
     print()
     print(len(oof_3))
 
-    # test_stream.write_bits("../../a_poop_story.txt", 16)
+    test_stream.write_bits("../../a_poop_story.txt", 16)
 
-    # test_stream.write_bits("../../a_poop_story_2.txt")
+    test_stream.write_allbits("../../a_poop_story_2.txt")
 
 if __name__ == "__main__":
     main()
