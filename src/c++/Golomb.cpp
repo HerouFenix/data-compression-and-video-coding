@@ -25,7 +25,7 @@ public:
     {
         int quotient = m / encoding_parameter,
             remainder = m % encoding_parameter;
-
+        /*
         int code_size, remainder_bin_size;
         if (remainder < unary_limit)
         {
@@ -38,9 +38,9 @@ public:
             remainder = remainder + unary_limit; //Encode the remainder values of r by coding the number r+2b−m in binary codewords of b bits.
 
             remainder_bin_size = b_param; // Binary codewords of b bits
-        } 
+        } */
 
-        bool *code = new bool[code_size];
+        bool *code = new bool[quotient + 1 + b_param];
         int i;
 
         // Unary code
@@ -52,7 +52,7 @@ public:
         
         // Binary Code
         // Coversion of remainder to binary
-        for (int j = remainder_bin_size-1; j >= 0; j--, i++)
+        for (int j = b_param-1; j >= 0; j--, i++)
         {
             //cout << "index: " << i;
             int k = remainder >> j;
@@ -62,7 +62,26 @@ public:
         return code;
     }
 
+    int decode(bool* encoded){
+        int result, index;
+        
+        int quotient, remainder;
+        result = index = quotient= remainder= 0;
+        while (1){
+            bool bit = encoded[index++];
+            if (!bit) break;
+            quotient++;
+        }
 
+        for (int j = b_param; j > 0; j--){
+            bool bit = encoded[index++];
+            remainder += bit << j-1;
+        }
+
+        return quotient*encoding_parameter + remainder;
+    }
+
+    /*
     int decode(bool* bits)
     {
         int number = 0, 
@@ -101,7 +120,7 @@ public:
         }
         
         return number;
-    }
+    }*/
     /* GETTERS & SETTERS */
 
 };
@@ -118,7 +137,7 @@ int main()
         {
             cout << test[j];
         }
-        cout << "\n";
+        cout << "\t";
         cout << "D E C O D I N G - " << g->decode(test) << "\n";
     }
     
