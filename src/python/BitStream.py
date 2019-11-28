@@ -1,6 +1,5 @@
 import os
 
-
 class BitStream:
     def __init__(self, file_path):
         self.file_path = file_path
