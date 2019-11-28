@@ -176,9 +176,9 @@ def main():
     print()
     print(len(oof_3))
 
-    test_stream.write_bits("../../a_poop_story.txt", 16)
+    test_stream.write_bits("../../tests/txt/a_poop_story.txt", 16)
 
-    test_stream.write_allbits("../../a_poop_story_2.txt")
+    test_stream.write_allbits("../../tests/txt/a_poop_story_2.txt")
 
 if __name__ == "__main__":
     main()
