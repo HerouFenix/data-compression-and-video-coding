@@ -1,5 +1,6 @@
-import numpy
-import cv2
+import numpy as np
+import cv2 as cv2
+from Frame import *
 
 """
 class VideoCodec:
@@ -93,7 +94,47 @@ class VideoCodec:
 
 
     def play_video(self):
+        with open(self.file_path, "rb") as stream:
 
+            line = stream.readline()
+            print(line)
+            frame = Frame420(self.height, self.width)
+            while True:
+                line = stream.readline()
+                frame.set_frame(stream)
+                BGR = frame.show_frame()
+
+                '''
+                fwidth = self.width
+                fheight = self.height
+                Y = np.fromfile(stream, dtype=np.uint8, count=fwidth*fheight).\
+                        reshape((fheight, fwidth))
+                # Load the UV (chrominance) data from the stream, and double its size
+                U = np.fromfile(stream, dtype=np.uint8, count=(fwidth//2)*(fheight//2)).\
+                        reshape((fheight//2, fwidth//2)).\
+                        repeat(2, axis=0).repeat(2, axis=1)
+                V = np.fromfile(stream, dtype=np.uint8, count=(fwidth//2)*(fheight//2)).\
+                        reshape((fheight//2, fwidth//2)).\
+                        repeat(2, axis=0).repeat(2, axis=1)
+                # Stack the YUV channels together, crop the actual resolution, convert to
+                # floating point for later calculations, and apply the standard biases
+                YUV = np.dstack((Y, U, V))[:self.height, :self.width, :].astype(np.float)
+                YUV[:, :, 0]  = YUV[:, :, 0]  - 16   # Offset Y by 16
+                YUV[:, :, 1:] = YUV[:, :, 1:] - 128  # Offset UV by 128
+                # YUV conversion matrix from ITU-R BT.601 version (SDTV)
+                # Note the swapped R and B planes!
+                #              Y       U       V
+                M = np.array([[1, 1.172,  0.000],    # B
+                            [1, -0.344, -0.714],    # G
+                            [1,  0.000,  1.402]])   # R
+                # Take the dot product with the matrix to produce BGR output, clamp the
+                # results to byte range and convert to bytes
+                BGR = YUV.dot(M.T).clip(0, 255).astype(np.uint8)'''
+                # Display the image with OpenCV
+                cv2.imshow('image', BGR)
+                if cv2.waitKey(1) & 0xFF == ord('q'):
+                    break
+            cv2.destroyAllWindows()
 #"""
 
 if __name__ == "__main__":
