@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 2.8)
+project( VideoCodec )
+find_package( OpenCV REQUIRED )
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+add_executable( VideoCodec VideoCodec.cpp )
+target_link_libraries( VideoCodec ${OpenCV_LIBS} )
