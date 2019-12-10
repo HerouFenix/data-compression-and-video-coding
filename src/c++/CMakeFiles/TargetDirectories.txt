@@ -1,3 +1,4 @@
-/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/rebuild_cache.dir
-/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/VideoCodec.dir
-/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/edit_cache.dir
+/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/rebuild_cache.dir
+/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/edit_cache.dir
+/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/VideoCodec.dir
+/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/Frame.dir

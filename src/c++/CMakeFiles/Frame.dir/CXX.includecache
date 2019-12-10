@@ -6,18 +6,16 @@
 
 #IncludeRegexTransform: 
 
-/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/VideoCodec.cpp
+/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/Frame.cpp
 stdio.h
--
-string
 -
 iostream
 -
-exception
--
-fstream
+math.h
 -
 opencv2/opencv.hpp
+-
+opencv2/core/mat.hpp
 -
 
 /usr/local/include/opencv4/opencv2/calib3d.hpp

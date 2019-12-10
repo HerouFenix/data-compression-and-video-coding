@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/VideoCodec.cpp" "/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/VideoCodec.dir/VideoCodec.cpp.o"
+  "/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/Frame.cpp" "/home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/Frame.dir/Frame.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

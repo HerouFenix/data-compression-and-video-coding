@@ -1,0 +1,1 @@
+/usr/bin/c++    -rdynamic CMakeFiles/Frame.dir/Frame.cpp.o  -o Frame 

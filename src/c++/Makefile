@@ -48,10 +48,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/pedro/CSLP/data-compression-and-video-coding/src/c++
+CMAKE_SOURCE_DIR = /home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/pedro/CSLP/data-compression-and-video-coding/src/c++
+CMAKE_BINARY_DIR = /home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -80,9 +80,9 @@ edit_cache/fast: edit_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles /home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles /home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/progress.marks
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ds/Desktop/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -123,6 +123,46 @@ VideoCodec/fast:
 	$(MAKE) -f CMakeFiles/VideoCodec.dir/build.make CMakeFiles/VideoCodec.dir/build
 .PHONY : VideoCodec/fast
 
+#=============================================================================
+# Target rules for targets named Frame
+
+# Build rule for target.
+Frame: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 Frame
+.PHONY : Frame
+
+# fast build rule for target.
+Frame/fast:
+	$(MAKE) -f CMakeFiles/Frame.dir/build.make CMakeFiles/Frame.dir/build
+.PHONY : Frame/fast
+
+Frame.o: Frame.cpp.o
+
+.PHONY : Frame.o
+
+# target to build an object file
+Frame.cpp.o:
+	$(MAKE) -f CMakeFiles/Frame.dir/build.make CMakeFiles/Frame.dir/Frame.cpp.o
+.PHONY : Frame.cpp.o
+
+Frame.i: Frame.cpp.i
+
+.PHONY : Frame.i
+
+# target to preprocess a source file
+Frame.cpp.i:
+	$(MAKE) -f CMakeFiles/Frame.dir/build.make CMakeFiles/Frame.dir/Frame.cpp.i
+.PHONY : Frame.cpp.i
+
+Frame.s: Frame.cpp.s
+
+.PHONY : Frame.s
+
+# target to generate assembly for a file
+Frame.cpp.s:
+	$(MAKE) -f CMakeFiles/Frame.dir/build.make CMakeFiles/Frame.dir/Frame.cpp.s
+.PHONY : Frame.cpp.s
+
 VideoCodec.o: VideoCodec.cpp.o
 
 .PHONY : VideoCodec.o
@@ -157,8 +197,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... VideoCodec"
 	@echo "... edit_cache"
+	@echo "... VideoCodec"
+	@echo "... Frame"
+	@echo "... Frame.o"
+	@echo "... Frame.i"
+	@echo "... Frame.s"
 	@echo "... VideoCodec.o"
 	@echo "... VideoCodec.i"
 	@echo "... VideoCodec.s"
