@@ -32,7 +32,30 @@ class VideoCodec:
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             cv2.destroyAllWindows()
+    
+    def compress_video(self, mode="JPEG-1"):
+        if mode not in ["JPEG-"+str(i) for i in range(1,8)] and mode != ["JPEG-LS"]:
+            print("Invalid mode")
+            return None
+        with open(self.file_path, "rb") as stream:
+            line = stream.readline()
+            
+            frame = Frame420(self.height, self.width)
+            while True:
+                line = stream.readline()
+                frame.set_frame(stream)
+                compressed_frame = frame.compress_frame(mode) 
+                frame.decompress_frame(compressed_frame, mode)   
+                frame.YUV = compressed_frame             
+                BGR = frame.show_frame()
+
+                # Display the image with OpenCV
+                cv2.imshow('image', BGR)
+                if cv2.waitKey() & 0xFF == ord('q'):
+                    break
+                break
+                
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    codec.play_video()
+    codec.compress_video("JPEG-6")

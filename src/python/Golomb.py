@@ -35,8 +35,8 @@ class Golomb:
         return quotient*self.encoding_parameter + remainder
 
 def main():
-    gomby = Golomb(5) #Kawaii desu-nee?
-
+    gomby = Golomb(2) #Kawaii desu-nee?
+    
     for i in range(16):
         testis = gomby.encode(i)
         print("Testing",i, "\t", end="")
