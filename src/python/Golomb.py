@@ -8,16 +8,20 @@ class Golomb:
         self.unary_limit = pow(2, self.b_param) - self.encoding_parameter; #Encode the first 2b−m values of r using the first 2b−m binary codewords of b−1 bits
     
     def encode(self, value):
+        code = [value<0]
+        value = abs(value)
+
         quotient = value // self.encoding_parameter
         remainder = value % self.encoding_parameter
 
-        code = [True] * quotient + [False]
+        code = code + [True] * quotient + [False]
         
         for i in range(self.b_param-1, -1, -1):
             code.append(bool((remainder >> i) & 1))
         return code
 
     def decode(self, code):
+        sign_bit = code.pop(0)
 
         quotient = 0
         remainder = 0
@@ -32,17 +36,21 @@ class Golomb:
             bit = code.pop(0)
             remainder += int(bit) << i
 
-        return quotient*self.encoding_parameter + remainder
+        value = quotient*self.encoding_parameter + remainder
+        if(sign_bit):
+            value = -value
+
+        return value
 
 def main():
-    gomby = Golomb(2) #Kawaii desu-nee?
-    
-    for i in range(16):
+    gomby = Golomb(5) #Kawaii desu-nee?
+
+    for i in range(-16, 16):
         testis = gomby.encode(i)
         print("Testing",i, "\t", end="")
-        for j in range(i//5+gomby.b_param+1):
+        for j in range(abs(i)//5+gomby.b_param+2):
             print(int(testis[j]), end="")
-        print(" D E C O D I N G - ", gomby.decode(testis),"\n")
+        print("  D E C O D I N G - ", gomby.decode(testis),"\n")
     
 
 if __name__ == "__main__":

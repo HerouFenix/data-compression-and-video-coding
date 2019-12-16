@@ -1,9 +1,12 @@
 import os
 
 class BitStream:
-    def __init__(self, file_path):
+    def __init__(self, file_path=None):
         self.file_path = file_path
-        self.file_size = os.path.getsize(self.file_path)*8
+        if file_path is not None:
+            self.file_size = os.path.getsize(self.file_path)*8
+        else:
+            self.file_size = 0
 
         self.bit_array = []
 
@@ -23,6 +26,12 @@ class BitStream:
 
         self.bit_offset = value
         return 1
+    
+    def reset_bit_array(self):
+        self.bit_array=[]
+    
+    def add_to_bit_array(self, array):
+        self.bit_array += array
 
     def get_bit_array(self):
         """
@@ -122,7 +131,6 @@ class BitStream:
 
                 for i in range(no_of_bits):
                     bit = self.bit_array[i]
-
                     bitstream |= int(bit) << (7 - i % 8)
 
                     if i % 8 == 0 and i != 0:
@@ -147,7 +155,7 @@ class BitStream:
         #
         # @param file_path The name of the file we want to write to
         """
-        return self.write_bits(file_path, self.bit_offset)
+        return self.write_bits(file_path, len(self.bit_array))
 
 
 

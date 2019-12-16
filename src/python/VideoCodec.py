@@ -1,6 +1,8 @@
 import numpy as np
 import cv2 as cv2
 from Frame import *
+from Golomb import Golomb
+from BitStream import BitStream
 
 class VideoCodec:
 
@@ -53,16 +55,47 @@ class VideoCodec:
             line = stream.readline()
             
             frame = Frame420(self.height, self.width)
+
+            gomby = Golomb(4)
+            bit_stream = BitStream()
+
             while True:
                 line = stream.readline()
                 frame.set_frame(stream)
 
                 compressed_frame = frame.compress_frame(mode)
                 
-                for f in compressed_frame:
-                    for x in np.nditer(a):
-                        print(x, end=' ')
+                y = compressed_frame[:,:,0]
+                u = compressed_frame[:,:,1]
+                v = compressed_frame[:,:,2]
+
+                #bit_array =[]
+                for x in np.nditer(y):
+                    bit_stream.add_to_bit_array(gomby.encode(int(x)))
+                    #print(gomby.encode(int(x)))
+                bit_stream.write_allbits(compress_path)
+
+                print("Finished compressing Y")
+
+                bit_stream.reset_bit_array()
+                #bit_array =[]
+                for x in np.nditer(u):
+                    bit_stream.add_to_bit_array(gomby.encode(int(x)))
+                    #print(gomby.encode(int(x)))
+                bit_stream.write_allbits(compress_path)
                 
+                print("Finished compressing U")
+
+                bit_stream.reset_bit_array()
+                #bit_array =[]
+                for x in np.nditer(v):
+                    bit_stream.add_to_bit_array(gomby.encode(int(x)))
+                    #print(gomby.encode(int(x)))
+                bit_stream.write_allbits(compress_path)
+
+                print("Finished compressing.")
+
+                break
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
