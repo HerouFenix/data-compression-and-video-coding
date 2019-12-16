@@ -33,7 +33,7 @@ class VideoCodec:
                     break
             cv2.destroyAllWindows()
     
-    def compress_video(self, mode="JPEG-1"):
+    def compress_video(self, mode="JPEG-3"):
         if mode not in ["JPEG-"+str(i) for i in range(1,8)] and mode != ["JPEG-LS"]:
             print("Invalid mode")
             return None
@@ -58,4 +58,4 @@ class VideoCodec:
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    codec.play_video()
+    codec.compress_video()
