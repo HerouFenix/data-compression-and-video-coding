@@ -86,10 +86,20 @@ class Frame:
     
         for i in range(self.height):
             for j in range(self.width):
-                predictor_y = compressed_y[i, j-1] if j-1 >= 0 else 0
-                predictor_u = compressed_u[i, j-1] if j-1 >= 0 else 0
-                predictor_v = compressed_v[i, j-1] if j-1 >= 0 else 0
+                if mode == "JPEG-1":
+                    predictor_y = compressed_y[i, j-1] if j-1 >= 0 else 0
+                    predictor_u = compressed_u[i, j-1] if j-1 >= 0 else 0
+                    predictor_v = compressed_v[i, j-1] if j-1 >= 0 else 0
+                elif mode == "JPEG-2":
+                    predictor_y = compressed_y[i-1, j] if i-1 >= 0 else 0
+                    predictor_u = compressed_u[i-1, j] if i-1 >= 0 else 0
+                    predictor_v = compressed_v[i-1, j] if i-1 >= 0 else 0
+                else:
+                    predictor_y = self.predictor(mode, a=int(compressed_y[i, j-1]), b=int(compressed_y[i-1,j]), c=int(compressed_y[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
+                    predictor_u = self.predictor(mode, a=int(compressed_u[i, j-1]), b=int(compressed_u[i-1,j]), c=int(compressed_u[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
+                    predictor_v = self.predictor(mode, a=int(compressed_v[i, j-1]), b=int(compressed_v[i-1,j]), c=int(compressed_v[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
                 
+
                 compressed_y[i,j] = compressed_y[i,j] + predictor_y
                 compressed_u[i,j] = compressed_u[i,j] + predictor_u
                 compressed_v[i,j] = compressed_v[i,j] + predictor_v
