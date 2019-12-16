@@ -113,6 +113,8 @@ class Frame:
     def show_frame(self):
         if self.YUV is None:
             return None
+        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
+                    :self.height, :self.width, :].astype(numpy.float)
         self.YUV[:, :, 0] = self.YUV[:, :, 0] - 16   # Offset Y by 16
         self.YUV[:, :, 1:] = self.YUV[:, :, 1:] - 128  # Offset UV by 128
         M = numpy.array([[1, 1.172,  0.000],    # B
@@ -138,9 +140,6 @@ class Frame444(Frame):
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
 
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
-
 
 class Frame422(Frame):
     def __init__(self, height, width):
@@ -154,11 +153,11 @@ class Frame422(Frame):
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
-
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
-
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+    
+    def show_frame(self):
+        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        super().show_frame()
 
 class Frame420(Frame):
     def __init__(self, height, width):
@@ -170,9 +169,14 @@ class Frame420(Frame):
         
         # Load the UV (chrominance) data from the stream, and double its size
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+    
+    def show_frame(self):
+        self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
+        self.Y = self.Y.repeat(2, axis=0).repeat(2, axis=1)
+        super().show_frame()
 
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
+
+        
