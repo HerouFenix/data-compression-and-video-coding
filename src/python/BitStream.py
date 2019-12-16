@@ -11,6 +11,7 @@ class BitStream:
         self.bit_array = []
 
         self.bit_offset = 0
+        self.input_stream = None
 
     # GETTERS & RESETTERS #
     def set_offset(self, value):
@@ -60,10 +61,29 @@ class BitStream:
         if no_of_bits < 0:
             print("Invalid number of bits. Values must be positive\n")
             return None
+        
+        if use_offset or self.input_stream is None:
+            print("Starting from scratch")
+            try:
+                self.input_stream = open(self.file_path, "rb")
+            except Exception as e:
+                print(
+                    "An exception occurred when reading from the given file. Exception  ", e, "\n")
 
         bit_counter = 0  # Used to count how many bits we've read
 
+        while bit_counter < no_of_bits:
+            byte = ord(self.input_stream.read(1))
+
+            for i in range(7, -1, -1):
+                bit_counter +=1
+                self.bit_array.append(((byte >> i) & 1) == 1)
+            
+        return 1
+
+        '''
         try:
+            
             with open(self.file_path, "rb") as loaded_file:
                 if (use_offset and self.bit_offset + no_of_bits > self.file_size):
                     print(
@@ -95,7 +115,7 @@ class BitStream:
 
         except Exception as e:
             print(
-                "An exception occurred when reading from the given file. Exception  ", e, "\n")
+                "An exception occurred when reading from the given file. Exception  ", e, "\n")'''
 
         return 0
 
@@ -125,7 +145,7 @@ class BitStream:
             return 0
 
         try:
-            with open(file_path, "wb") as file_writer:
+            with open(file_path, "ab") as file_writer:
                 remainder = no_of_bits % 8
                 bitstream = 0 
 

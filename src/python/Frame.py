@@ -38,9 +38,9 @@ class Frame:
             print("Impossible to compress None")
             return None
 
-        compress_y = numpy.zeros((self.height, self.width))
-        compress_u = numpy.zeros((self.height, self.width))
-        compress_v = numpy.zeros((self.height, self.width))
+        compress_y = numpy.zeros(self.Y.shape)
+        compress_u = numpy.zeros(self.U.shape)
+        compress_v = numpy.zeros(self.V.shape)
 
         for i in range(self.height -1, -1, -1):
             
@@ -111,8 +111,9 @@ class Frame:
 
 
     def show_frame(self):
-        if self.YUV is None:
-            return None
+        
+        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
+            :self.height, :self.width, :].astype(numpy.float)
         self.YUV[:, :, 0] = self.YUV[:, :, 0] - 16   # Offset Y by 16
         self.YUV[:, :, 1:] = self.YUV[:, :, 1:] - 128  # Offset UV by 128
         M = numpy.array([[1, 1.172,  0.000],    # B
@@ -121,6 +122,7 @@ class Frame:
 
         # Take the dot product with the matrix to produce BGR output
         BGR = self.YUV.dot(M.T).clip(0, 255).astype(numpy.uint8)
+        print(BGR)
         return BGR
 
 
@@ -138,9 +140,6 @@ class Frame444(Frame):
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
 
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
-
 
 class Frame422(Frame):
     def __init__(self, height, width):
@@ -154,10 +153,11 @@ class Frame422(Frame):
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
+    def show_frame(self):
+        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        return super().show_frame()   
 
 
 class Frame420(Frame):
@@ -170,9 +170,11 @@ class Frame420(Frame):
         
         # Load the UV (chrominance) data from the stream, and double its size
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
-            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2)).repeat(2, axis=0).repeat(2, axis=1)
+            self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
-        self.YUV = numpy.dstack((self.Y, self.U, self.V))[
-            :self.height, :self.width, :].astype(numpy.float)
+    def show_frame(self):
+        self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
+        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        return super().show_frame()
