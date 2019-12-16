@@ -74,9 +74,9 @@ class VideoCodec:
             control = 0
             old_c = 0
 
-            while True:
-                read_stream.read_bits(1000)
-                got_number = self.gomby.add_bits(read_stream.get_bit_array()[-1000:])
+            while read_stream.read_bits(10000):
+                
+                got_number = self.gomby.add_bits(read_stream.get_bit_array()[-10000:])
                 old_c = control
                 
                 if got_number:
@@ -87,9 +87,18 @@ class VideoCodec:
                         write_stream.write(str(num).encode())
                 if old_c != control:
                     print("ay lmao", number_of_numbers)
-                if number_of_numbers >= (self.height*self.width*3):
-                    break
-                    write_stream.write("FRAME\n".encode())
+                
+            
+            num_bits = read_stream.read_allbits()
+            got_number = self.gomby.add_bits(read_stream.get_bit_array()[-num_bits:])
+            old_c = control
+            
+            if got_number:
+                nums = self.gomby.decode_nums()
+                number_of_numbers += len(nums)
+                control += 1
+                for num in nums:
+                    write_stream.write(str(num).encode())
 
                 
 
