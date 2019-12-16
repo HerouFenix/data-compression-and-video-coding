@@ -15,7 +15,7 @@ class VideoCodec:
             self.header = (frame_reader.readline()).decode("UTF-8")
 
         header_info = self.header.split(" ")
-        frame_type = "420"
+        self.frame_type = "420"
         print(self.header[:-1])
 
         for info in header_info:
@@ -28,20 +28,22 @@ class VideoCodec:
             elif info[0] == "C":
                 info = info.replace("C", "")
                 if info.startswith("420"):
-                    frame_type = "420"
+                    self.frame_type = "420"
                 if info.startswith("422"):
-                    frame_type = "422"
+                    self.frame_type = "422"
                 if info.startswith("444"):
-                    frame_type = "444"
+                    self.frame_type = "444"
             elif info[0] == "G":
                 self.gomby = Golomb(int(info[1:]))
+            elif info[0] == "M":
+                self.decompress_mode = info[1:]
 
-        if frame_type == "420":
+        if self.frame_type == "420":
             self.frame = Frame420(self.height, self.width)
-        if frame_type == "422":
-            frame_type = Frame422(self.height, self.width)
-        if frame_type == "444":
-            frame_type = Frame444(self.height, self.width)
+        if self.frame_type == "422":
+            self.frame = Frame422(self.height, self.width)
+        if self.frame_type == "444":
+            self.frame = Frame444(self.height, self.width)
 
     def play_video(self):
         with open(self.file_path, "rb") as stream:
@@ -71,34 +73,31 @@ class VideoCodec:
             write_stream.write(self.header.encode())
             write_stream.write("FRAME\n".encode())
             number_of_numbers = 0
-            control = 0
-            old_c = 0
+            control = number_of_numbers
+            array_of_nums = []
 
             while read_stream.read_bits(10000):
                 
                 got_number = self.gomby.add_bits(read_stream.get_bit_array()[-10000:])
-                old_c = control
+                control = number_of_numbers
                 
                 if got_number:
                     nums = self.gomby.decode_nums()
                     number_of_numbers += len(nums)
-                    control += 1
-                    for num in nums:
-                        write_stream.write(str(num).encode())
-                if old_c != control:
+                    array_of_nums += nums
+
+                if control != number_of_numbers:
                     print("ay lmao", number_of_numbers)
                 
             
             num_bits = read_stream.read_allbits()
             got_number = self.gomby.add_bits(read_stream.get_bit_array()[-num_bits:])
-            old_c = control
+            control = number_of_numbers
+            nums = self.gomby.decode_nums()
             
-            if got_number:
-                nums = self.gomby.decode_nums()
-                number_of_numbers += len(nums)
-                control += 1
-                for num in nums:
-                    write_stream.write(str(num).encode())
+            ## At this point we have all of the frame saved in memory, we will now start to divide it in frames to proceed to decompressing
+            self.frame.set_frame_by_array(nums)
+            self.frame.decompress_frame(self.frame, self.decompress_mode)
 
                 
 

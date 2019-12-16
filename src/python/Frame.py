@@ -122,7 +122,7 @@ class Frame:
 
         # Take the dot product with the matrix to produce BGR output
         BGR = self.YUV.dot(M.T).clip(0, 255).astype(numpy.uint8)
-        print(BGR)
+
         return BGR
 
 
@@ -139,6 +139,17 @@ class Frame444(Frame):
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
+    
+    def set_frame_by_array(self, nums):
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+            .reshape((self.height, self.width))
+        
+        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2], dtype=numpy.int8)\
+            .reshape((self.height, self.width//2))
+        
+        self.V = numpy.array(nums[self.width*self.height*2:self.width*3*self.height], dtype=numpy.int8)\
+            .reshape((self.height//2, self.width//2))
+
 
 
 class Frame422(Frame):
@@ -154,6 +165,16 @@ class Frame422(Frame):
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+    
+    def set_frame_by_array(self, nums):
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+            .reshape((self.height, self.width))
+        
+        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2], dtype=numpy.int8)\
+            .reshape((self.height, self.width//2))
+        
+        self.V = numpy.array(nums[self.width*self.height*2:(self.width*self.height*2+(self.width//2)*(self.height//2))], dtype=numpy.int8)\
+            .reshape((self.height//2, self.width//2))
 
     def compress_frame(self, mode):
         self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
@@ -177,6 +198,17 @@ class Frame420(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+
+    def set_frame_by_array(self, nums):
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+            .reshape((self.height, self.width))
+        
+        self.U = numpy.array(nums[self.width*self.height:((self.width//2)*(self.height//2)+self.width*self.height)], dtype=numpy.int8)\
+            .reshape((self.height//2, self.width//2))
+        
+        self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.width*self.height*2], dtype=numpy.int8)\
+            .reshape((self.height//2, self.width//2))
+        
 
     def compress_frame(self, mode):
         self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
