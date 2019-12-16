@@ -33,7 +33,7 @@ class Frame:
         return a+b-c
 
 
-    def compress_frame(self, mode="JPEG-1"):
+    def compress_frame(self, mode):
         if self.Y is None or self.U is None or self.V is None:
             print("Impossible to compress None")
             return None
@@ -79,7 +79,7 @@ class Frame:
         return numpy.dstack((compress_y, compress_u, compress_v))[
             :self.height, :self.width, :].astype(numpy.float)
     
-    def decompress_frame(self, frame, mode="JPEG-1"):
+    def decompress_frame(self, frame, mode):
         compressed_y = frame[:,:,0]
         compressed_u = frame[:,:,1]
         compressed_v = frame[:,:,2]
