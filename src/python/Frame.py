@@ -66,7 +66,7 @@ class Frame:
                 else:
                     if i-1>=0 and j-1>=0:
                         predictor_y = self.predictor(mode, a=int(self.Y[i, j-1]), b=int(self.Y[i-1,j]), c=int(self.Y[i-1,j-1]))
-                        predictor_u = self.predictor(mode, a=int(self.U[i, j-1]), b=int(self.U[i-1,j]), c=int(self.V[i-1,j-1]))
+                        predictor_u = self.predictor(mode, a=int(self.U[i, j-1]), b=int(self.U[i-1,j]), c=int(self.U[i-1,j-1]))
                         predictor_v = self.predictor(mode, a=int(self.V[i, j-1]), b=int(self.V[i-1,j]), c=int(self.V[i-1,j-1]))
                     else:
                         predictor_y = 0

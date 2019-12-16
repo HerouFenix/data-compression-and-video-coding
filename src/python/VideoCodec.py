@@ -11,9 +11,25 @@ class VideoCodec:
         with open(self.file_path, "rb") as frame_reader:
             header = (frame_reader.readline()).decode("UTF-8")
         header_info = header.split(" ")
-        self.width = int(header_info[1].replace("W", ""))
-        self.height = int(header_info[2].replace("H", ""))
-        self.fps = header_info[3].replace("F", "")
+
+        for info in header_info:
+            if info[0] == "W":
+                self.width = int(info.replace("W", ""))
+            elif info[0] == "H":
+                self.height = int(info.replace("H", ""))  
+            elif info[0] == "F":      
+                self.fps = info.replace("F", "")
+            elif info[0] == "C":  
+                info = info.replace("C","")
+                if info.startswith("420"):
+                    self.frame_type = "420"
+                if info.startswith("422"):
+                    self.frame_type = "422"
+                if info.startswith("444"):
+                    self.frame_type = "444"
+
+        if self.frame_type == None:
+            self.frame_type = "420"
 
 
     def play_video(self):
