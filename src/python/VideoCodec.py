@@ -4,6 +4,7 @@ from Frame import *
 from Golomb import Golomb
 from BitStream import BitStream
 
+
 class VideoCodec:
 
     def __init__(self, file_path):
@@ -13,42 +14,62 @@ class VideoCodec:
         with open(self.file_path, "rb") as frame_reader:
             header = (frame_reader.readline()).decode("UTF-8")
         header_info = header.split(" ")
-        self.width = int(header_info[1].replace("W", ""))
-        self.height = int(header_info[2].replace("H", ""))
-        self.fps = header_info[3].replace("F", "")
 
+        frame_type = "420"
+
+        for info in header_info:
+            if info[0] == "W":
+                self.width = int(info.replace("W", ""))
+            elif info[0] == "H":
+                self.height = int(info.replace("H", ""))
+            elif info[0] == "F":
+                self.fps = info.replace("F", "")
+            elif info[0] == "C":
+                info = info.replace("C", "")
+                if info.startswith("420"):
+                    frame_type = "420"
+                if info.startswith("422"):
+                    frame_type = "422"
+                if info.startswith("444"):
+                    frame_type = "444"
+
+        if frame_type == "420":
+            self.frame = Frame420(self.height, self.width)
+        if frame_type == "422":
+            frame_type = Frame422(self.height, self.width)
+        if frame_type == "444":
+            frame_type = Frame444(self.height, self.width)
 
     def play_video(self):
         with open(self.file_path, "rb") as stream:
 
             line = stream.readline()
-            #print(line)
-            frame = Frame420(self.height, self.width)
+            # print(line)
+
             while True:
                 line = stream.readline()
-                frame.set_frame(stream)
-                BGR = frame.show_frame()
+                self.frame.set_frame(stream)
+                BGR = self.frame.show_frame()
 
                 # Display the image with OpenCV
                 cv2.imshow('image', BGR)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
             cv2.destroyAllWindows()
-    
+
     def decompress_frame(self, mode="JPEG-1"):
-        if mode not in ["JPEG-"+str(i) for i in range(1,8)] and mode != "JPEG-LS":
+        if mode not in ["JPEG-"+str(i) for i in range(1, 8)] and mode != "JPEG-LS":
             print("Invalid mode")
             return None
         with open(self.file_path, "rb") as stream:
             line = stream.readline()
-            
-            frame = Frame420(self.height, self.width)
+
             while True:
                 line = stream.readline()
-                frame.set_frame(stream)
+                self.frame.set_frame(stream)
 
     def compress_video(self, compress_path, mode="JPEG-1"):
-        if mode not in ["JPEG-"+str(i) for i in range(1,8)] and mode != "JPEG-LS":
+        if mode not in ["JPEG-"+str(i) for i in range(1, 8)] and mode != "JPEG-LS":
             print("Invalid mode")
             return None
         with open(self.file_path, "rb") as stream:
@@ -61,7 +82,9 @@ class VideoCodec:
 
             while True:
                 line = stream.readline()
-                frame.set_frame(stream)
+                self.frame.set_frame(stream)
+
+                compressed_frame = self.frame.compress_frame(mode)
 
                 compressed_frame = frame.compress_frame(mode)
                 
