@@ -58,4 +58,4 @@ class VideoCodec:
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    codec.compress_video("JPEG-6")
+    codec.play_video()
