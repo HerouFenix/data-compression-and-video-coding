@@ -155,6 +155,10 @@ class Frame422(Frame):
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
+    def compress_frame(self, mode):
+        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        return super().compress_frame(mode)  
+    
     def show_frame(self):
         self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
         return super().show_frame()   
@@ -173,6 +177,11 @@ class Frame420(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+
+    def compress_frame(self, mode):
+        self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
+        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        return super().compress_frame(mode)
 
     def show_frame(self):
         self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
