@@ -123,9 +123,9 @@ class VideoCodec:
 
                 compressed_frame = self.frame.compress_frame(mode)
                 
-                y = compressed_frame[:,:,0]
-                u = compressed_frame[:,:,1]
-                v = compressed_frame[:,:,2]
+                y = compressed_frame[0]
+                u = compressed_frame[1]
+                v = compressed_frame[2]
 
                 for x in np.nditer(y):
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
@@ -150,11 +150,13 @@ class VideoCodec:
 
                 print("Finished compressing.")
 
+
+
                 break
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
     codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
-    compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
-    compressed_codec.decompress_video("ducks_take_off.y4m")
+    #compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
+    #compressed_codec.decompress_video("ducks_take_off.y4m")
     

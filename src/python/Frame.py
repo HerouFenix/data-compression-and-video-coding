@@ -42,73 +42,314 @@ class Frame:
         compress_u = numpy.zeros(self.U.shape)
         compress_v = numpy.zeros(self.V.shape)
 
+        u_skip = None
+        v_skip = None
+
+        if(compress_y.size != compress_u.size):
+            #420
+            #u metade ; v metade
+            print("Compressing 420")
+            u_skip = 0
+            u_index = [0,0]
+
+            v_skip = 0
+            v_index = [0,0]
+        elif (compress_y.size != compress_v.size):
+            #422
+            #v metade
+            print("Compressing 422")
+            v_skip = 0
+            v_index = [0,0]
+
         for i in range(self.height -1, -1, -1):
             
             for j in range(self.width -1, -1, -1):
                 if mode == "JPEG-1":
                     if j-1>=0:
                         predictor_y = int(self.Y[i, j-1])
-                        predictor_u = int(self.U[i, j-1])
-                        predictor_v = int(self.V[i, j-1])
+                        if u_skip is None:
+                            predictor_u = int(self.U[i, j-1])
+                        if v_skip is None:
+                            predictor_v = int(self.V[i, j-1])
                     else:
                         predictor_y = 0
-                        predictor_u = 0
-                        predictor_v = 0
+                        if u_skip is None:
+                            predictor_u = 0
+                        if v_skip is None:
+                            predictor_v = 0
+
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[1]-1>=0:
+                                predictor_u = int(self.U[u_index[0], u_index[1]-1])
+                            else:
+                                predictor_u = 0
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[1]-1>=0:
+                                predictor_v = int(self.V[v_index[0], v_index[1]-1])
+                            else:
+                                predictor_v = 0
+                            v_skip = 0
+
                 elif mode == "JPEG-2":
                     if i-1>=0:
                         predictor_y = int(self.Y[i-1,j])
-                        predictor_u = int(self.U[i-1,j])
-                        predictor_v = int(self.V[i-1,j])
+                        if u_skip is None:
+                            predictor_u = int(self.U[i-1,j])
+                        if v_skip is None:
+                            predictor_v = int(self.V[i-1,j])
+                    
                     else:
                         predictor_y = 0
-                        predictor_u = 0
-                        predictor_v = 0
+                        if u_skip is None:
+                            predictor_u = 0
+                        if v_skip is None:
+                            predictor_v = 0
+
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[0]-1>=0:
+                                predictor_u = int(self.U[u_index[0]-1, u_index[1]])
+                            else:
+                                predictor_u = 0
+                        
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[1]-1>=0:
+                                predictor_v = int(self.V[v_index[0]-1, v_index[1]])
+                            else:
+                                predictor_v = 0
+                            
+                            v_skip = 0
                 else:
                     if i-1>=0 and j-1>=0:
                         predictor_y = self.predictor(mode, a=int(self.Y[i, j-1]), b=int(self.Y[i-1,j]), c=int(self.Y[i-1,j-1]))
-                        predictor_u = self.predictor(mode, a=int(self.U[i, j-1]), b=int(self.U[i-1,j]), c=int(self.U[i-1,j-1]))
-                        predictor_v = self.predictor(mode, a=int(self.V[i, j-1]), b=int(self.V[i-1,j]), c=int(self.V[i-1,j-1]))
+                        if u_skip is None:
+                            predictor_u = self.predictor(mode, a=int(self.U[i, j-1]), b=int(self.U[i-1,j]), c=int(self.U[i-1,j-1]))
+                        if v_skip is None:
+                            predictor_v = self.predictor(mode, a=int(self.V[i, j-1]), b=int(self.V[i-1,j]), c=int(self.V[i-1,j-1]))
                     else:
                         predictor_y = 0
-                        predictor_u = 0
-                        predictor_v = 0
-                compress_y[i,j] = int(self.Y[i,j]) - predictor_y
-                compress_u[i,j] = int(self.U[i,j]) - predictor_u
-                compress_v[i,j] = int(self.V[i,j]) - predictor_v
 
-        return numpy.dstack((compress_y, compress_u, compress_v))[
-            :self.height, :self.width, :].astype(numpy.float)
+                        if u_skip is None:
+                            predictor_u = 0
+                        if v_skip is None:
+                            predictor_v = 0
+                    
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[0]-1>=0 and u_index[1]-1>=0:
+                                predictor_u = self.predictor(mode, a=int(self.U[u_index[0], u_index[1]-1]), b=int(self.U[u_index[0]-1,u_index[1]]), c=int(self.U[u_index[0]-1,u_index[1]-1]))
+
+                            else:
+                                predictor_u = 0
+                            
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[1]-1>=0:
+                                predictor_v = self.predictor(mode, a=int(self.V[v_index[0], v_index[1]-1]), b=int(self.V[v_index[0]-1,v_index[1]]), c=int(self.V[v_index[0]-1,v_index[1]-1]))
+                            else:
+                                predictor_v = 0
+                            
+                            v_skip = 0
+
+                compress_y[i,j] = int(self.Y[i,j]) - predictor_y
+
+                if u_skip is None:
+                    compress_u[i,j] = int(self.U[i,j]) - predictor_u
+                elif u_skip == 0:
+                    compress_u[u_index[0],u_index[1]] = int(self.U[u_index[0],u_index[1]]) - predictor_u
+                    u_index[1] += 1
+
+                if v_skip is None:
+                    compress_v[i,j] = int(self.V[i,j]) - predictor_v
+                elif v_skip == 0:
+                    compress_v[v_index[0],v_index[1]] = int(self.V[v_index[0],v_index[1]]) - predictor_v
+                    v_index[1] += 1
+    
+            if v_skip is not None:
+                if v_skip == 2:
+                    v_skip = 0
+                else:
+                    v_index[0] += 1
+                    v_index[1] = 0
+                    v_skip = 2
+            if u_skip is not None:
+                if u_skip == 2:
+                    u_skip = 0
+                else:
+                    u_index[0] += 1
+                    u_index[1] = 0
+                    u_skip = 2
+
+        self.Y = compress_y
+        self.U = compress_u
+        self.V = compress_v
+
+        return (self.Y, self.U, self.V)
     
     def decompress_frame(self, frame, mode):
-        compressed_y = frame[:,:,0]
-        compressed_u = frame[:,:,1]
-        compressed_v = frame[:,:,2]
+        decompressed_y = frame.Y
+        decompressed_u = frame.U
+        decompressed_v = frame.V
+
+        u_skip = None
+        v_skip = None
+
+        if(decompressed_y.size != decompressed_u.size):
+            #420
+            #u metade ; v metade
+            print("Decompressing 420")
+            u_skip = 0
+            u_index = [0,0]
+
+            v_skip = 0
+            v_index = [0,0]
+        elif (decompressed_y.size != decompressed_v.size):
+            #422
+            #v metade
+            print("Decompressing 422")
+            v_skip = 0
+            v_index = [0,0]
+
     
         for i in range(self.height):
             for j in range(self.width):
                 if mode == "JPEG-1":
-                    predictor_y = compressed_y[i, j-1] if j-1 >= 0 else 0
-                    predictor_u = compressed_u[i, j-1] if j-1 >= 0 else 0
-                    predictor_v = compressed_v[i, j-1] if j-1 >= 0 else 0
+                    predictor_y = decompressed_y[i, j-1] if j-1 >= 0 else 0
+                    predictor_u = decompressed_u[i, j-1] if u_skip is None and j-1 >= 0 else 0
+                    predictor_v = decompressed_v[i, j-1] if v_skip is None and j-1 >= 0 else 0
+
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[1]-1>=0:
+                                predictor_u = decompressed_u[u_index[0], u_index[1]-1] 
+                            else:
+                                predictor_u = 0
+                            
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[1]-1>=0:
+                                predictor_v = decompressed_v[v_index[0], v_index[1]-1] 
+                            else:
+                                predictor_v = 0
+                            
+                            v_skip = 0
+
                 elif mode == "JPEG-2":
-                    predictor_y = compressed_y[i-1, j] if i-1 >= 0 else 0
-                    predictor_u = compressed_u[i-1, j] if i-1 >= 0 else 0
-                    predictor_v = compressed_v[i-1, j] if i-1 >= 0 else 0
+                    predictor_y = decompressed_y[i-1, j] if i-1 >= 0 else 0
+                    predictor_u = decompressed_u[i-1, j] if u_skip is None and i-1 >= 0 else 0
+                    predictor_v = decompressed_v[i-1, j] if v_skip is None and i-1 >= 0 else 0
+
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[0]-1>=0:
+                                predictor_u = decompressed_u[u_index[0]-1, u_index[1]] 
+                            else:
+                                predictor_u = 0
+                            
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[0]-1>=0:
+                                predictor_v = decompressed_v[v_index[0]-1, v_index[1]] 
+                            else:
+                                predictor_v = 0
+                            
+                            v_skip = 0
+
                 else:
-                    predictor_y = self.predictor(mode, a=int(compressed_y[i, j-1]), b=int(compressed_y[i-1,j]), c=int(compressed_y[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
-                    predictor_u = self.predictor(mode, a=int(compressed_u[i, j-1]), b=int(compressed_u[i-1,j]), c=int(compressed_u[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
-                    predictor_v = self.predictor(mode, a=int(compressed_v[i, j-1]), b=int(compressed_v[i-1,j]), c=int(compressed_v[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
+                    predictor_y = self.predictor(mode, a=int(decompressed_y[i, j-1]), b=int(decompressed_y[i-1,j]), c=int(decompressed_y[i-1,j-1])) if i-1>=0 and j-1>=0 else 0
+                    predictor_u = self.predictor(mode, a=int(decompressed_u[i, j-1]), b=int(decompressed_u[i-1,j]), c=int(decompressed_u[i-1,j-1])) if u_skip is None and i-1>=0 and j-1>=0 else 0
+                    predictor_v = self.predictor(mode, a=int(decompressed_v[i, j-1]), b=int(decompressed_v[i-1,j]), c=int(decompressed_v[i-1,j-1])) if v_skip is None and i-1>=0 and j-1>=0 else 0
+
+                    if u_skip is not None and u_skip != 2:
+                        if u_skip == 0:
+                            u_skip = 1
+                        else:
+                            if u_index[0]-1>=0 and u_index[1]-1>=0:
+                                predictor_u = self.predictor(mode, a=int(decompressed_u[u_index[0], u_index[1]-1]), b=int(decompressed_u[u_index[0]-1,u_index[1]]), c=int(decompressed_u[u_index[0]-1,u_index[1]-1]))
+                            else:
+                                predictor_u = 0
+                            
+                            u_skip = 0
+
+                    if v_skip is not None and v_skip != 2:
+                        if v_skip == 0:
+                            v_skip = 1
+                        else:
+                            if v_index[0]-1>=0 and v_index[1]-1>=0:
+                                predictor_v = self.predictor(mode, a=int(decompressed_v[v_index[0], v_index[1]-1]), b=int(decompressed_v[v_index[0]-1,v_index[1]]), c=int(decompressed_v[v_index[0]-1,v_index[1]-1]))
+                            else:
+                                predictor_v = 0
+                            
+                            v_skip = 0
+
+                decompressed_y[i,j] = decompressed_y[i,j] + predictor_y
                 
+                if u_skip is None:
+                    decompressed_u[i,j] = decompressed_u[i,j] + predictor_u
+                elif u_skip == 0:
+                    decompressed_u[u_index[0],u_index[1]] = decompressed_u[u_index[0],u_index[1]] + predictor_u
+                    u_index[1] += 1
 
-                compressed_y[i,j] = compressed_y[i,j] + predictor_y
-                compressed_u[i,j] = compressed_u[i,j] + predictor_u
-                compressed_v[i,j] = compressed_v[i,j] + predictor_v
+                if v_skip is None:
+                    decompressed_v[i,j] = decompressed_v[i,j] + predictor_v
+                elif v_skip == 0:
+                    decompressed_v[v_index[0],v_index[1]] = decompressed_v[v_index[0],v_index[1]] + predictor_v
+                    v_index[1] += 1
+                
+            if v_skip is not None:
+                if v_skip == 2:
+                    v_skip = 0
+                else:
+                    v_index[0] += 1
+                    v_index[1] = 0
+                    v_skip = 2
+            if u_skip is not None:
+                if u_skip == 2:
+                    u_skip = 0
+                else:
+                    u_index[0] += 1
+                    u_index[1] = 0
+                    u_skip = 2
 
-        self.YUV = numpy.dstack((compressed_y, compressed_u, compressed_v))[
-            :self.height, :self.width, :].astype(numpy.float)
 
-        return self.YUV
+        self.Y = decompressed_y
+        self.U = decompressed_u
+        self.V = decompressed_v
 
+        return (self.Y, self.U, self.V)
 
     def show_frame(self):
         
@@ -155,14 +396,9 @@ class Frame422(Frame):
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
-    def compress_frame(self, mode):
-        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
-        return super().compress_frame(mode)  
-    
     def show_frame(self):
-        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
-        return super().show_frame()   
-
+        self.V = self.V.repeat(2,axis=0).repeat(2,axis=1)
+        return super().show_frame()
 
 class Frame420(Frame):
     def __init__(self, height, width):
@@ -178,12 +414,8 @@ class Frame420(Frame):
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
-    def compress_frame(self, mode):
-        self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
-        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
-        return super().compress_frame(mode)
-
     def show_frame(self):
-        self.U = self.U.repeat(2, axis=0).repeat(2, axis=1)
-        self.V = self.V.repeat(2, axis=0).repeat(2, axis=1)
+        self.U = self.U.repeat(2,axis=0).repeat(2,axis=1)
+        self.V = self.V.repeat(2,axis=0).repeat(2,axis=1)
         return super().show_frame()
+        
