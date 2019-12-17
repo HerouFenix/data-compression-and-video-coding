@@ -129,6 +129,7 @@ class Frame:
 class Frame444(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width*3
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
@@ -155,10 +156,13 @@ class Frame444(Frame):
 class Frame422(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width*2+(self.width//2)*(self.height//2)
+
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
+        self.limit_to_convert = height*width*2
         
         # Load the UV (chrominance) data from the stream, and double its size
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
@@ -167,13 +171,13 @@ class Frame422(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
     
     def set_frame_by_array(self, nums):
-        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+        self.Y = numpy.array(nums[:self.width*self.height])\
             .reshape((self.height, self.width))
         
-        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2], dtype=numpy.int8)\
+        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2])\
             .reshape((self.height, self.width//2))
         
-        self.V = numpy.array(nums[self.width*self.height*2:(self.width*self.height*2+(self.width//2)*(self.height//2))], dtype=numpy.int8)\
+        self.V = numpy.array(nums[self.width*self.height*2:(self.width*self.height*2+(self.width//2)*(self.height//2))])\
             .reshape((self.height//2, self.width//2))
 
     def compress_frame(self, mode):
@@ -188,6 +192,7 @@ class Frame422(Frame):
 class Frame420(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width + (self.width//2)*(self.height//2) + (self.width//2)*(self.height//2)
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
@@ -200,14 +205,17 @@ class Frame420(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
     def set_frame_by_array(self, nums):
-        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.float)\
             .reshape((self.height, self.width))
-        
-        self.U = numpy.array(nums[self.width*self.height:((self.width//2)*(self.height//2)+self.width*self.height)], dtype=numpy.int8)\
+        print("set up Y frame")
+
+        self.U = numpy.array(nums[self.width*self.height:((self.width//2)*(self.height//2)+self.width*self.height)], dtype=numpy.float)\
             .reshape((self.height//2, self.width//2))
+        print("set up U frame")
         
-        self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.width*self.height*2], dtype=numpy.int8)\
+        self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.limit_to_convert], dtype=numpy.float)\
             .reshape((self.height//2, self.width//2))
+        print("set up V frame")
         
 
     def compress_frame(self, mode):

@@ -81,19 +81,23 @@ class VideoCodec:
             control = number_of_numbers
             array_of_nums = []
 
-            while read_stream.read_bits(10000):
+            while read_stream.read_bits(5000):
                 
-                got_number = self.gomby.add_bits(read_stream.get_bit_array()[-10000:])
+                got_number = self.gomby.add_bits(read_stream.get_bit_array()[-5000:])
                 control = number_of_numbers
                 
                 if got_number:
                     nums = self.gomby.decode_nums()
                     number_of_numbers += len(nums)
                     array_of_nums += nums
-
-                if control != number_of_numbers:
-                    print("ay lmao", number_of_numbers)
                 
+                if number_of_numbers >= self.frame.limit_to_convert:
+                    print("Converted", number_of_numbers)
+                    self.frame.set_frame_by_array(array_of_nums)
+                    print("Finished writing to frame")
+                    self.frame.decompress_frame(self.frame, self.decompress_mode)
+                    print("Done")
+                    return 1
             
             num_bits = read_stream.read_allbits()
             got_number = self.gomby.add_bits(read_stream.get_bit_array()[-num_bits:])

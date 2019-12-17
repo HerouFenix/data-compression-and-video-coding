@@ -47,7 +47,7 @@ class BitStream:
         return self.file_size
 
     # READ BITS #
-    def read_bits(self, no_of_bits, use_offset=True):
+    def read_bits(self, no_of_bits, use_offset=True, allbits=False):
         """
         # Function used to read n bits from our file. Read values are put into our
         # bit_array
@@ -61,6 +61,10 @@ class BitStream:
         if no_of_bits < 0:
             print("Invalid number of bits. Values must be positive\n")
             return None
+        
+        char_pos =0
+        if allbits:
+            print("I'm doing this function again")
 
         try:
             
@@ -78,9 +82,12 @@ class BitStream:
                     bit_counter = num_bytes*8
                 
                 initial_offset = self.bit_offset
-                for control in range(self.file_size//8):
-
-                    byte = ord(loaded_file.read(1))
+                for control in range(no_of_bits//8):
+                    a = loaded_file.read(1)
+                    if allbits:
+                        print("index",char_pos,a)
+                        char_pos+=1    
+                    byte = ord(a)
 
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
@@ -114,7 +121,7 @@ class BitStream:
         """
 
         if (use_offset):
-            return self.read_bits(self.file_size - self.bit_offset, use_offset) * (self.file_size - self.bit_offset)
+            return self.read_bits(self.file_size - self.bit_offset, use_offset, allbits=True) * (self.file_size - self.bit_offset)
         return self.read_bits(self.file_size, use_offset)  * self.file_size
 
     # WRITE BITS #
@@ -178,13 +185,8 @@ def main():
     oof_2 = test_stream.get_bit_array()
     print("Third read, getting the next 16 bits\n")
 
-    test_stream.read_bits(16)
+    test_stream.read_allbits()
     oof_3 = test_stream.get_bit_array()
-
-    for i in range(len(oof)):
-        print(int(oof[i]))
-        print(int(oof_2[i]))
-        print(int(oof_3[i]))
 
     for i in oof_3:
         print(int(i), end="")
