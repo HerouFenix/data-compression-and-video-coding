@@ -351,11 +351,11 @@ class Frame:
                     u_skip = 2
 
 
-        self.Y = decompressed_y
-        self.U = decompressed_u
-        self.V = decompressed_v
+        frame.Y = decompressed_y
+        frame.U = decompressed_u
+        frame.V = decompressed_v
 
-        return (self.Y, self.U, self.V)
+        return (frame.Y, frame.U, frame.V)
 
     def show_frame(self):
         
@@ -447,7 +447,7 @@ class Frame420(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
 
     def set_frame_by_array(self, nums):
-        print(len(nums))
+
         self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.float)\
             .reshape((self.height, self.width))
         print("set up Y frame")
@@ -464,4 +464,3 @@ class Frame420(Frame):
         self.U = self.U.repeat(2,axis=0).repeat(2,axis=1)
         self.V = self.V.repeat(2,axis=0).repeat(2,axis=1)
         return super().show_frame()
-        

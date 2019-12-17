@@ -44,6 +44,10 @@ class VideoCodec:
             self.frame = Frame422(self.height, self.width)
         if self.frame_type == "444":
             self.frame = Frame444(self.height, self.width)
+        
+        self.test_y = None
+        self.test_u = None
+        self.test_v = None
 
     def play_video(self):
         with open(self.file_path, "rb") as stream:
@@ -105,6 +109,7 @@ class VideoCodec:
             
             ## At this point we have all of the frame saved in memory, we will now start to divide it in frames to proceed to decompressing
             self.frame.set_frame_by_array(array_of_nums)
+            
             self.frame.decompress_frame(self.frame, self.decompress_mode)
             BGR = self.frame.show_frame()
 
@@ -139,6 +144,10 @@ class VideoCodec:
                 y = compressed_frame[0]
                 u = compressed_frame[1]
                 v = compressed_frame[2]
+                self.test_y = y
+                self.test_u = u
+                self.test_v = v   
+    
                 number_of_numbers = 0
                 for x in np.nditer(y):
                     number_of_numbers += 1
