@@ -68,10 +68,15 @@ class VideoCodec:
             return None
         
         with open(decompress_path, "wb") as write_stream:
+            #Get the bitstream to read the compression
             read_stream = BitStream(self.file_path)
             read_stream.set_offset(len(self.header)*8)
+
+            #Write the header for the video
             write_stream.write(self.header.encode())
             write_stream.write("FRAME\n".encode())
+
+            #This marks the start of decompression
             number_of_numbers = 0
             control = number_of_numbers
             array_of_nums = []
@@ -92,7 +97,7 @@ class VideoCodec:
             
             num_bits = read_stream.read_allbits()
             got_number = self.gomby.add_bits(read_stream.get_bit_array()[-num_bits:])
-            control = number_of_numbers
+
             nums = self.gomby.decode_nums()
             
             ## At this point we have all of the frame saved in memory, we will now start to divide it in frames to proceed to decompressing
