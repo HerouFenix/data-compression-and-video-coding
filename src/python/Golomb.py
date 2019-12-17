@@ -1,4 +1,5 @@
 import math
+import BitStream
 
 class Golomb:
     def __init__(self,m):
@@ -35,11 +36,11 @@ class Golomb:
             if not bit:
                 break
 
-        return len(bit_test) >= (self.b_param +1)
+        return len(bit_test) >= (self.b_param)
 
     def add_bits(self, bits):
         self.bit_feed += bits
-        return self.can_decode
+        return self.can_decode()
 
     def add_bit(self, bit):
         self.bit_feed.append(bit)
@@ -75,15 +76,32 @@ class Golomb:
         return value
 
 def main():
-    gomby = Golomb(5) #Kawaii desu-nee?
-
+    gomby = Golomb(4) #Kawaii desu-nee?
+    bity = BitStream.BitStream()
+    
     for i in range(-16, 16):
         testis = gomby.encode(i)
-        print("Testing",i, "\t", end="")
-        for j in range(abs(i)//5+gomby.b_param+2):
-            print(int(testis[j]), end="")
-        print("  D E C O D I N G - ", gomby.decode(testis),"\n")
-    
+        bity.add_to_bit_array(testis)
+
+    bity.write_allbits("test.bin")
+
+    bity2 = BitStream.BitStream("test.bin")
+    array_of_nums = []
+    number_of_numbers = 0
+    while bity2.read_bits(20):
+        got_number = gomby.add_bits(bity2.get_bit_array())
+        bity2.delete_bits(20)
+
+        if got_number:
+            nums = gomby.decode_nums()
+            array_of_nums += nums
+            number_of_numbers += len(nums)
+        
+    num_bits = bity2.read_allbits()
+    got_number = gomby.add_bits(bity2.get_bit_array())
+    nums = gomby.decode_nums()
+    array_of_nums += nums
+    print(array_of_nums)
 
 if __name__ == "__main__":
     main()

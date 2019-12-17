@@ -28,6 +28,9 @@ class BitStream:
         self.bit_offset = value
         return 1
     
+    def delete_bits(self, num):
+        self.bit_array = self.bit_array[num:]
+    
     def reset_bit_array(self):
         self.bit_array=[]
     
@@ -47,7 +50,7 @@ class BitStream:
         return self.file_size
 
     # READ BITS #
-    def read_bits(self, no_of_bits, use_offset=True):
+    def read_bits(self, no_of_bits, use_offset=True, allbits=False):
         """
         # Function used to read n bits from our file. Read values are put into our
         # bit_array
@@ -61,6 +64,10 @@ class BitStream:
         if no_of_bits < 0:
             print("Invalid number of bits. Values must be positive\n")
             return None
+        
+        char_pos =0
+        if allbits:
+            print("I'm doing this function again")
 
         try:
             
@@ -76,28 +83,34 @@ class BitStream:
                     num_bytes = self.bit_offset//8
                     loaded_file.read(num_bytes)
                     bit_counter = num_bytes*8
-                
-                initial_offset = self.bit_offset
-                for control in range(self.file_size//8):
 
-                    byte = ord(loaded_file.read(1))
-
+                initial_offset = self.bit_offset                
+                while True:
+                    if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
+                        return 1
+                    a = loaded_file.read(1)
+                    if allbits:
+                        print("index",char_pos,a)
+                        char_pos+=1    
+                    byte = ord(a)
+                    if allbits:
+                        print("number of bits read",bit_counter)
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                             return 1
-
-                        # Used to advance our file pointer until we catch up with our offset
                         bit_counter +=1
                         if use_offset and bit_counter <= self.bit_offset:
                             continue
-
                         if use_offset:
                             # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
                             self.bit_array.append(((byte >> i) & 1) == 1)
                             self.bit_offset += 1
                         else:
                             # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
-                            self.bit_array[bit_counter-1] = ((byte >> i) & 1) == 1
+                            self.bit_array[bit_counter-1] = ((byte >> i) & 1) == 1                     
+ 
+            if allbits:
+                print("everything went allright")    
             return 1
 
         except Exception as e:
@@ -114,7 +127,8 @@ class BitStream:
         """
 
         if (use_offset):
-            return self.read_bits(self.file_size - self.bit_offset, use_offset) * (self.file_size - self.bit_offset)
+            bits_to_read = self.file_size - self.bit_offset
+            return self.read_bits(bits_to_read, use_offset, allbits=True) * bits_to_read
         return self.read_bits(self.file_size, use_offset)  * self.file_size
 
     # WRITE BITS #
@@ -138,17 +152,17 @@ class BitStream:
 
                 for i in range(no_of_bits):
                     bit = self.bit_array[i]
-                    bitstream |= int(bit) << (7 - i % 8)
 
                     if i % 8 == 0 and i != 0:
-                        file_writer.write(bitstream.to_bytes(1,"little"))
+                        file_writer.write(bitstream.to_bytes(1,"big"))
                         bitstream = 0
+                    bitstream |= int(bit) << (7 - i % 8)
 
                 if (remainder != 0):
                     for i in range (remainder, 8):
                         bitstream |= 0 << (7 - i % 8)
 
-                file_writer.write(bitstream.to_bytes(1,"little"))
+                file_writer.write(bitstream.to_bytes(1,"big"))
             return 1
         except Exception as e:
             print(
@@ -178,13 +192,8 @@ def main():
     oof_2 = test_stream.get_bit_array()
     print("Third read, getting the next 16 bits\n")
 
-    test_stream.read_bits(16)
+    test_stream.read_allbits()
     oof_3 = test_stream.get_bit_array()
-
-    for i in range(len(oof)):
-        print(int(oof[i]))
-        print(int(oof_2[i]))
-        print(int(oof_3[i]))
 
     for i in oof_3:
         print(int(i), end="")
@@ -194,6 +203,10 @@ def main():
     test_stream.write_bits("../../tests/txt/a_poop_story.txt", 16)
 
     test_stream.write_allbits("../../tests/txt/a_poop_story_2.txt")
+    ## Can she read what she wrote
+    test_stream = BitStream("../../tests/txt/a_poop_story_2.txt")
+    
+    
 
 if __name__ == "__main__":
     main()

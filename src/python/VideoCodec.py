@@ -15,7 +15,7 @@ class VideoCodec:
             self.header = (frame_reader.readline()).decode("UTF-8")
 
         header_info = self.header.split(" ")
-        frame_type = "420"
+        self.frame_type = "420"
         print(self.header[:-1])
 
         for info in header_info:
@@ -28,20 +28,22 @@ class VideoCodec:
             elif info[0] == "C":
                 info = info.replace("C", "")
                 if info.startswith("420"):
-                    frame_type = "420"
+                    self.frame_type = "420"
                 if info.startswith("422"):
-                    frame_type = "422"
+                    self.frame_type = "422"
                 if info.startswith("444"):
-                    frame_type = "444"
+                    self.frame_type = "444"
             elif info[0] == "G":
                 self.gomby = Golomb(int(info[1:]))
+            elif info[0] == "M":
+                self.decompress_mode = info[1:]
 
-        if frame_type == "420":
+        if self.frame_type == "420":
             self.frame = Frame420(self.height, self.width)
-        if frame_type == "422":
-            frame_type = Frame422(self.height, self.width)
-        if frame_type == "444":
-            frame_type = Frame444(self.height, self.width)
+        if self.frame_type == "422":
+            self.frame = Frame422(self.height, self.width)
+        if self.frame_type == "444":
+            self.frame = Frame444(self.height, self.width)
 
     def play_video(self):
         with open(self.file_path, "rb") as stream:
@@ -60,45 +62,56 @@ class VideoCodec:
                     break
             cv2.destroyAllWindows()
 
-    def decompress_video(self, decompress_path, mode="JPEG-1"):
-        if mode not in ["JPEG-"+str(i) for i in range(1, 8)] and mode != "JPEG-LS":
-            print("Invalid mode")
-            return None
-        
+    def decompress_video(self, decompress_path):       
         with open(decompress_path, "wb") as write_stream:
+            #Get the bitstream to read the compression
             read_stream = BitStream(self.file_path)
             read_stream.set_offset(len(self.header)*8)
+
+            #Write the header for the video
             write_stream.write(self.header.encode())
             write_stream.write("FRAME\n".encode())
-            number_of_numbers = 0
-            control = 0
-            old_c = 0
 
-            while read_stream.read_bits(10000):
+            #This marks the start of decompression
+            number_of_numbers = 0
+            array_of_nums = []
+
+            while read_stream.read_bits(5000):
                 
-                got_number = self.gomby.add_bits(read_stream.get_bit_array()[-10000:])
-                old_c = control
-                
+                got_number = self.gomby.add_bits(read_stream.get_bit_array())
+                read_stream.delete_bits(5000)
+
                 if got_number:
                     nums = self.gomby.decode_nums()
                     number_of_numbers += len(nums)
-                    control += 1
-                    for num in nums:
-                        write_stream.write(str(num).encode())
-                if old_c != control:
-                    print("ay lmao", number_of_numbers)
+                    array_of_nums += nums
                 
+                if number_of_numbers >= self.frame.limit_to_convert:
+                    print("Converted", number_of_numbers)
+                    self.frame.set_frame_by_array(array_of_nums)
+                    print("Finished writing to frame")
+                    self.frame.decompress_frame(self.frame, self.decompress_mode)
+                    print("Done")
+                    return 1
             
             num_bits = read_stream.read_allbits()
-            got_number = self.gomby.add_bits(read_stream.get_bit_array()[-num_bits:])
-            old_c = control
+            print(num_bits)
+            got_number = self.gomby.add_bits(read_stream.get_bit_array())
+
+            nums = self.gomby.decode_nums()
+            print(len(self.gomby.bit_feed))
+            array_of_nums += nums
+            print("Finished loadiiiiiing file")
             
-            if got_number:
-                nums = self.gomby.decode_nums()
-                number_of_numbers += len(nums)
-                control += 1
-                for num in nums:
-                    write_stream.write(str(num).encode())
+            ## At this point we have all of the frame saved in memory, we will now start to divide it in frames to proceed to decompressing
+            self.frame.set_frame_by_array(array_of_nums)
+            self.frame.decompress_frame(self.frame, self.decompress_mode)
+            BGR = self.frame.show_frame()
+
+            # Display the image with OpenCV
+            cv2.imshow('image', BGR)
+            if cv2.waitKey() & 0xFF == ord('q'):
+                return
 
                 
 
@@ -126,8 +139,9 @@ class VideoCodec:
                 y = compressed_frame[0]
                 u = compressed_frame[1]
                 v = compressed_frame[2]
-
+                number_of_numbers = 0
                 for x in np.nditer(y):
+                    number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
                 bit_stream.write_allbits(compress_path)
@@ -136,6 +150,8 @@ class VideoCodec:
 
                 bit_stream.reset_bit_array()
                 for x in np.nditer(u):
+                    number_of_numbers += 1
+
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
                 bit_stream.write_allbits(compress_path)
@@ -144,19 +160,17 @@ class VideoCodec:
 
                 bit_stream.reset_bit_array()
                 for x in np.nditer(v):
+                    number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
-
+                print(number_of_numbers)
                 bit_stream.write_allbits(compress_path)
 
                 print("Finished compressing.")
-
-
-
                 break
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
     codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
-    #compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
-    #compressed_codec.decompress_video("ducks_take_off.y4m")
+    compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
+    compressed_codec.decompress_video("ducks_take_off.y4m")
     

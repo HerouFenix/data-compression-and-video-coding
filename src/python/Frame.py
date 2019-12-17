@@ -211,6 +211,12 @@ class Frame:
         decompressed_y = frame.Y
         decompressed_u = frame.U
         decompressed_v = frame.V
+        print("Frame Y")
+        print(decompressed_y)
+        print("Frame U")
+        print(decompressed_u)
+        print("Frame V")
+        print(decompressed_v)
 
         u_skip = None
         v_skip = None
@@ -363,13 +369,14 @@ class Frame:
 
         # Take the dot product with the matrix to produce BGR output
         BGR = self.YUV.dot(M.T).clip(0, 255).astype(numpy.uint8)
-        print(BGR)
+
         return BGR
 
 
 class Frame444(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width*3
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
@@ -380,21 +387,45 @@ class Frame444(Frame):
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
+    
+    def set_frame_by_array(self, nums):
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.int8)\
+            .reshape((self.height, self.width))
+        
+        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2], dtype=numpy.int8)\
+            .reshape((self.height, self.width//2))
+        
+        self.V = numpy.array(nums[self.width*self.height*2:self.width*3*self.height], dtype=numpy.int8)\
+            .reshape((self.height//2, self.width//2))
+
 
 
 class Frame422(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width*2+(self.width//2)*(self.height//2)
+
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
+        self.limit_to_convert = height*width*2
         
         # Load the UV (chrominance) data from the stream, and double its size
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+    
+    def set_frame_by_array(self, nums):
+        self.Y = numpy.array(nums[:self.width*self.height])\
+            .reshape((self.height, self.width))
+        
+        self.U = numpy.array(nums[self.width*self.height:self.width*self.height*2])\
+            .reshape((self.height, self.width//2))
+        
+        self.V = numpy.array(nums[self.width*self.height*2:(self.width*self.height*2+(self.width//2)*(self.height//2))])\
+            .reshape((self.height//2, self.width//2))
 
     def show_frame(self):
         self.V = self.V.repeat(2,axis=0).repeat(2,axis=1)
@@ -403,6 +434,7 @@ class Frame422(Frame):
 class Frame420(Frame):
     def __init__(self, height, width):
         Frame.__init__(self, height, width)
+        self.limit_to_convert = height*width + (width//2)*(height//2) + (width//2)*(height//2)
 
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
@@ -413,6 +445,20 @@ class Frame420(Frame):
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
         self.V = numpy.fromfile(stream, dtype=numpy.uint8, count=(
             self.width//2)*(self.height//2)).reshape((self.height//2, self.width//2))
+
+    def set_frame_by_array(self, nums):
+        print(len(nums))
+        self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.float)\
+            .reshape((self.height, self.width))
+        print("set up Y frame")
+
+        self.U = numpy.array(nums[self.width*self.height:((self.width//2)*(self.height//2)+self.width*self.height)], dtype=numpy.float)\
+            .reshape((self.height//2, self.width//2))
+        print("set up U frame")
+        
+        self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.limit_to_convert], dtype=numpy.float)\
+            .reshape((self.height//2, self.width//2))
+        print("set up V frame")
 
     def show_frame(self):
         self.U = self.U.repeat(2,axis=0).repeat(2,axis=1)
