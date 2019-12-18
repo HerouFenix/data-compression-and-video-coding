@@ -31,8 +31,7 @@ class Frame:
         if c<=min(a,b):
             return max(a,b)
         return a+b-c
-
-
+    
     def compress_frame(self, mode):
         if self.Y is None or self.U is None or self.V is None:
             print("Impossible to compress None")
@@ -207,16 +206,10 @@ class Frame:
 
         return (self.Y, self.U, self.V)
     
-    def decompress_frame(self, frame, mode):
-        decompressed_y = frame.Y
-        decompressed_u = frame.U
-        decompressed_v = frame.V
-        print("Frame Y")
-        print(decompressed_y)
-        print("Frame U")
-        print(decompressed_u)
-        print("Frame V")
-        print(decompressed_v)
+    def decompress_frame(self, mode):
+        decompressed_y = self.Y
+        decompressed_u = self.U
+        decompressed_v = self.V
 
         u_skip = None
         v_skip = None
@@ -351,11 +344,11 @@ class Frame:
                     u_skip = 2
 
 
-        frame.Y = decompressed_y
-        frame.U = decompressed_u
-        frame.V = decompressed_v
+        self.Y = decompressed_y
+        self.U = decompressed_u
+        self.V = decompressed_v
 
-        return (frame.Y, frame.U, frame.V)
+        return (self.Y, self.U, self.V)
 
     def show_frame(self):
         

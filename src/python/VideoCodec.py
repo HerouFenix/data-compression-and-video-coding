@@ -12,11 +12,11 @@ class VideoCodec:
 
         # Get our header info
         with open(self.file_path, "rb") as frame_reader:
-            self.header = (frame_reader.readline()).decode("UTF-8")
+            self.header = (frame_reader.readline()).decode("UTF-8").rstrip()
 
         header_info = self.header.split(" ")
         self.frame_type = "420"
-        print(self.header[:-1])
+        print(self.header)
 
         for info in header_info:
             if info[0] == "W":
@@ -94,7 +94,7 @@ class VideoCodec:
                     print("Converted", number_of_numbers)
                     self.frame.set_frame_by_array(array_of_nums)
                     print("Finished writing to frame")
-                    self.frame.decompress_frame(self.frame, self.decompress_mode)
+                    self.frame.decompress_frame(self.decompress_mode)
                     print("Done")
                     return 1
             
@@ -110,7 +110,11 @@ class VideoCodec:
             ## At this point we have all of the frame saved in memory, we will now start to divide it in frames to proceed to decompressing
             self.frame.set_frame_by_array(array_of_nums)
             
-            self.frame.decompress_frame(self.frame, self.decompress_mode)
+            y,u,v = self.frame.decompress_frame(self.decompress_mode)
+            print(y)
+            print(u)
+            print(v)
+
             BGR = self.frame.show_frame()
 
             # Display the image with OpenCV
@@ -138,6 +142,9 @@ class VideoCodec:
             while True:
                 line = stream.readline()
                 self.frame.set_frame(stream)
+                print(self.frame.Y)
+                print(self.frame.U)
+                print(self.frame.V)
 
                 compressed_frame = self.frame.compress_frame(mode)
                 
@@ -178,8 +185,8 @@ class VideoCodec:
                 break
 
 if __name__ == "__main__":
-    codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
+    #codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
+    #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
     compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
     compressed_codec.decompress_video("ducks_take_off.y4m")
     
