@@ -541,13 +541,6 @@ class Frame:
         decompressed_u = self.U
         decompressed_v = self.V
 
-        print("Decompressed Y be like")
-        print(decompressed_y)
-        print("Decompressed U be like")
-        print(decompressed_u)
-        print("Decompressed V be like")
-        print(decompressed_v)
-
         u_skip = False
         v_skip = False
 
@@ -780,15 +773,15 @@ class Frame420(Frame):
 
         self.Y = numpy.array(nums[:self.width*self.height], dtype=numpy.float)\
             .reshape((self.height, self.width))
-        print("set up Y frame")
+        print("Set up Y frame")
 
         self.U = numpy.array(nums[self.width*self.height:((self.width//2)*(self.height//2)+self.width*self.height)], dtype=numpy.float)\
             .reshape((self.height//2, self.width//2))
-        print("set up U frame")
+        print("Set up U frame")
         
         self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.limit_to_convert], dtype=numpy.float)\
             .reshape((self.height//2, self.width//2))
-        print("set up V frame")
+        print("Set up V frame")
         return nums[self.limit_to_convert:]
 
     def show_frame(self):

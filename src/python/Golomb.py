@@ -11,7 +11,7 @@ class Golomb:
         self.bit_feed = []
 
     def encode(self, value):
-        code = [value<0]
+        code = [True, value<0]
         value = abs(value)
 
         quotient = value // self.encoding_parameter
@@ -24,6 +24,7 @@ class Golomb:
         return code
 
     def can_decode(self):
+        """
         if self.bit_feed == []:
             return False
         
@@ -37,6 +38,21 @@ class Golomb:
                 break
 
         return len(bit_test) >= (self.b_param)
+        """
+        if len(self.bit_feed) < 2:
+            return False
+        
+        bit_test = self.bit_feed[2:]
+        
+        while True:
+            if bit_test == []:
+                return False
+            bit = bit_test.pop(0)
+            if not bit:
+                break
+
+        return len(bit_test) >= (self.b_param)
+
 
     def add_bits(self, bits):
         self.bit_feed += bits
@@ -49,11 +65,15 @@ class Golomb:
     def decode_nums(self):
         num_array = []
         while self.can_decode():
-            num_array.append(self.decode(self.bit_feed))
+            if self.bit_feed[0]:
+                num_array.append(self.decode(self.bit_feed))
+            else:
+                self.bit_feed.pop(0)
 
         return num_array
 
     def decode(self, code):
+        code.pop(0)
         sign_bit = code.pop(0)
 
         quotient = 0

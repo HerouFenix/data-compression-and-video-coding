@@ -102,8 +102,8 @@ class VideoCodec:
                     array_of_nums = self.frame.set_frame_by_array(array_of_nums)
                     y,u,v = self.frame.decompress_frame(self.decompress_mode)
 
-                    read_stream.clear_padding()
-                    print("Stream ofset at", read_stream.bit_offset)
+                    #read_stream.clear_padding()
+                    print("Stream offset at", read_stream.bit_offset)
 
                     write_stream.write(y.astype(np.uint8))
                     write_stream.write(u.astype(np.uint8))
@@ -129,7 +129,7 @@ class VideoCodec:
                 write_stream.write(u.astype(np.uint8))
                 write_stream.write(v.astype(np.uint8))
                 print("Finished writing decompressed frame")
-
+                #girar
             print("Finished writing decompressed frame")
 
             
@@ -201,9 +201,9 @@ class VideoCodec:
                 print("Finished compressing Frame")
 
 if __name__ == "__main__":
-    #codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
+    codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
     #codec.play_video()
-    #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
+    codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m","JPEG-LS")
     compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
     compressed_codec.decompress_video("ducks_take_off.y4m")
 
