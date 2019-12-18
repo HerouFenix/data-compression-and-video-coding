@@ -12,13 +12,14 @@ class VideoCodec:
 
         # Get our header info
         with open(self.file_path, "rb") as frame_reader:
-            self.header = (frame_reader.readline()).decode("UTF-8").rstrip()
+            self.header = (frame_reader.readline()).decode("UTF-8")
 
         header_info = self.header.split(" ")
         self.frame_type = "420"
         print(self.header)
 
         for info in header_info:
+            info = info.rstrip()
             if info[0] == "W":
                 self.width = int(info.replace("W", ""))
             elif info[0] == "H":
@@ -70,7 +71,7 @@ class VideoCodec:
         with open(decompress_path, "wb") as write_stream:
             #Get the bitstream to read the compression
             read_stream = BitStream(self.file_path)
-            read_stream.set_offset(len(self.header)*8)
+            read_stream.set_offset(len(self.header)*8 + 8)
 
             #Write the header for the video
             write_stream.write(self.header.encode())
@@ -185,8 +186,8 @@ class VideoCodec:
                 break
 
 if __name__ == "__main__":
-    #codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
+    codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
+    codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m")
     compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
     compressed_codec.decompress_video("ducks_take_off.y4m")
     
