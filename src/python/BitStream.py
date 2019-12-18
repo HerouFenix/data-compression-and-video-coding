@@ -48,6 +48,9 @@ class BitStream:
         # Function used to get our current file's size
         """
         return self.file_size
+    
+    def clear_padding(self):
+        self.bit_offset += self.bit_offset%8
 
     # READ BITS #
     def read_bits(self, no_of_bits, use_offset=True, allbits=False):
@@ -89,12 +92,9 @@ class BitStream:
                     if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                         return 1
                     a = loaded_file.read(1)
-                    if allbits:
-                        print("index",char_pos,a)
-                        char_pos+=1    
+                       
                     byte = ord(a)
-                    if allbits:
-                        print("number of bits read",bit_counter)
+                    
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                             return 1

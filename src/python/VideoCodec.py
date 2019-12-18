@@ -144,30 +144,30 @@ class VideoCodec:
                 y = compressed_frame[0]
                 u = compressed_frame[1]
                 v = compressed_frame[2]
-                self.test_y = y
-                self.test_u = u
-                self.test_v = v   
+                print(y)
+                print(u)
+                print(v)
     
                 number_of_numbers = 0
                 for x in np.nditer(y):
                     number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
-                bit_stream.write_allbits(compress_path)
+                #bit_stream.write_allbits(compress_path)
 
                 print("Finished compressing Y")
 
-                bit_stream.reset_bit_array()
+                #bit_stream.reset_bit_array()
                 for x in np.nditer(u):
                     number_of_numbers += 1
 
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
-                bit_stream.write_allbits(compress_path)
+                #bit_stream.write_allbits(compress_path)
                 
                 print("Finished compressing U")
 
-                bit_stream.reset_bit_array()
+                #bit_stream.reset_bit_array()
                 for x in np.nditer(v):
                     number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
