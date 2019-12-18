@@ -789,6 +789,7 @@ class Frame420(Frame):
         self.V = numpy.array(nums[((self.width//2)*(self.height//2)+self.width*self.height):self.limit_to_convert], dtype=numpy.float)\
             .reshape((self.height//2, self.width//2))
         print("set up V frame")
+        return nums[self.limit_to_convert:]
 
     def show_frame(self):
         self.U = self.U.repeat(2,axis=0).repeat(2,axis=1)
