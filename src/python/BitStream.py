@@ -32,6 +32,7 @@ class BitStream:
         self.bit_array = self.bit_array[num:]
     
     def reset_bit_array(self):
+        print(len(self.bit_array))
         self.bit_array=[]
     
     def add_to_bit_array(self, array):
@@ -150,19 +151,16 @@ class BitStream:
                 remainder = no_of_bits % 8
                 bitstream = 0 
 
-                for i in range(no_of_bits):
+                for i in range(no_of_bits - remainder):
                     bit = self.bit_array[i]
 
                     if i % 8 == 0 and i != 0:
                         file_writer.write(bitstream.to_bytes(1,"big"))
                         bitstream = 0
                     bitstream |= int(bit) << (7 - i % 8)
-
-                if (remainder != 0):
-                    for i in range (remainder, 8):
-                        bitstream |= 0 << (7 - i % 8)
-
+                self.delete_bits(no_of_bits - remainder)
                 file_writer.write(bitstream.to_bytes(1,"big"))
+
             return 1
         except Exception as e:
             print(
@@ -177,6 +175,15 @@ class BitStream:
         # @param file_path The name of the file we want to write to
         """
         return self.write_bits(file_path, len(self.bit_array))
+
+    def close(self, file_path):
+        with open(file_path, "ab") as file_writer:
+            bitstream = 0
+            for i in range(len(self.bit_array)):
+                bit = self.bit_array.pop(0)
+                bitstream |= int(bit) << (7 - i % 8) 
+
+            file_writer.write(bitstream.to_bytes(1,"big"))
 
 
 

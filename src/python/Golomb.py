@@ -11,7 +11,8 @@ class Golomb:
         self.bit_feed = []
 
     def encode(self, value):
-        code = [True, value<0]
+        ##Every number now starts with a True
+        code = [value<0]
         value = abs(value)
 
         quotient = value // self.encoding_parameter
@@ -28,7 +29,7 @@ class Golomb:
         if self.bit_feed == []:
             return False
         
-        bit_test = self.bit_feed[1:]
+        bit_test = self.bit_feed[2:]
         
         while True:
             if bit_test == []:
@@ -39,10 +40,10 @@ class Golomb:
 
         return len(bit_test) >= (self.b_param)
         """
-        if len(self.bit_feed) < 2:
+        if len(self.bit_feed) < 1:
             return False
         
-        bit_test = self.bit_feed[2:]
+        bit_test = self.bit_feed[1:]
         
         while True:
             if bit_test == []:
@@ -65,15 +66,13 @@ class Golomb:
     def decode_nums(self):
         num_array = []
         while self.can_decode():
-            if self.bit_feed[0]:
-                num_array.append(self.decode(self.bit_feed))
-            else:
-                self.bit_feed.pop(0)
-
+            num_array.append(self.decode(self.bit_feed))
+            
         return num_array
 
     def decode(self, code):
-        code.pop(0)
+        ##Take away the control Number
+        #code.pop(0)
         sign_bit = code.pop(0)
 
         quotient = 0
@@ -98,20 +97,21 @@ class Golomb:
 def main():
     gomby = Golomb(4) #Kawaii desu-nee?
     bity = BitStream.BitStream()
-    
+    with open("test.bin", "wb") as f:
+        f.write(b"")
+
     for i in range(-16, 0):
         testis = gomby.encode(i)
         bity.add_to_bit_array(testis)
 
     bity.write_allbits("test.bin")
-
-    bity.reset_bit_array()
-    bity.clear_padding()
-    
+     
     for i in range (16):
         testis = gomby.encode(i)
         bity.add_to_bit_array(testis)
+
     bity.write_allbits("test.bin")
+    bity.close("test.bin")
 
     bity2 = BitStream.BitStream("test.bin")
     array_of_nums = []
@@ -124,7 +124,7 @@ def main():
             nums = gomby.decode_nums()
             array_of_nums += nums
             number_of_numbers += len(nums)
-        
+    
     bity2.read_allbits()
     got_number = gomby.add_bits(bity2.get_bit_array())
     nums = gomby.decode_nums()
