@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include "BitStream.cpp"
 
 using namespace std;
 
@@ -9,11 +10,11 @@ class Golomb
 {
 private:
     int encoding_parameter;
+    int b_param;
     int unary_limit;
     vector<bool> bit_feed;
 
 public:
-    int b_param;
     /* Constructor of the Golomb converter */
     Golomb(int m)
     {
@@ -59,7 +60,7 @@ public:
         int index = 1;
         bool bit;
         while (true){
-            if (index > bit_feed.size()) return false;
+            if (index >= bit_feed.size()) return false;
             bit = bit_feed.at(index++);
             if (!bit) break;
         }
@@ -67,8 +68,8 @@ public:
     }
 
     bool add_bits(vector<bool> bits){
-        for (auto i = bits.begin(); i!=bits.end(); ++i)
-            bit_feed.push_back(*i);
+        for (int i = 0; i <bits.size(); i++)
+            bit_feed.push_back(bits[i]);
 
         return can_decode();
     }
@@ -80,9 +81,44 @@ public:
 
     vector<int> decode_nums(){
         vector<int> num_array;
-        while (can_decode())
-            num_array.push_back(decode(bit_feed));
         
+        while (can_decode())
+            num_array.push_back(decode());
+        return num_array;
+    }
+
+    int decode(){
+        
+        bool sign = bit_feed.at(0);
+
+        int result, index;
+        
+        int quotient, remainder;
+        result = quotient= remainder= 0;
+        index = 1;
+        while (1){
+            bool bit = bit_feed.at(index++);
+            if (!bit) break;
+            quotient++;
+        }
+
+        for (int j = b_param; j > 0; j--){
+            bool bit = bit_feed.at(index++);
+            remainder += bit << j-1;
+        }
+
+        int value = quotient*encoding_parameter + remainder;
+        sign ? value = value*-1 : value = value;
+        /*
+        cout << "[";
+        for (auto i = bit_feed.begin(); i != bit_feed.begin()+index; i++){
+            cout << *i <<",";
+        }
+        cout << "\n";
+    */
+
+        bit_feed.erase(bit_feed.begin(), bit_feed.begin()+index);
+        return value;
     }
 
     int decode(vector<bool> encoded){
@@ -107,6 +143,7 @@ public:
         int value = quotient*encoding_parameter + remainder;
         sign ? value = value*-1 : value = value;
         encoded.erase(encoded.begin(), encoded.begin()+index);
+        
         return value;
     }
 
@@ -114,19 +151,58 @@ public:
 
 int main()
 {
-    Golomb *g = new Golomb(5);
+    Golomb *gomby = new Golomb(4);
+    BitStream *bity = new BitStream();
 
-    for (int i = -15; i < 16; i++)
-    {
-        vector<bool> test = g->encode(i);
-        cout << "Testing " << i << "\t";
-        for (int j = 0; j <= abs(i) / 5 + g->b_param; j++)
-        {
-            cout << test.at(j);
-        }
-        cout << "\t";
-        cout << "D E C O D I N G - " << g->decode(test) << "\n";
+    ofstream write_file("test.bin");
+    write_file << "";
+    write_file.close(); 
+
+    for (int i = -16; i < 0; i++){
+        vector<bool> testis = gomby->encode(i);
+        bity->add_to_bit_array(testis);
     }
+
+    bity->write_bits("test.bin");
+
+    for (int i = 0; i < 16; i++){
+        vector<bool> testis = gomby->encode(i);
+        bity->add_to_bit_array(testis);
+    }
+    bity->write_bits("test.bin");
+    bity->close("test.bin");
     
+    BitStream *bity2 = new BitStream("test.bin");
+    vector<int> array_of_nums;
+    int number_of_numbers = 0;
+    vector<int> nums;
+    bool got_number;
+
+    while (bity2->read_bits(20)){
+
+        got_number = gomby->add_bits(bity2->get_bit_array());
+
+        bity2->delete_bits(20);
+        
+        if (got_number) {
+            nums = gomby->decode_nums();
+            for (auto i = nums.begin(); i!=nums.end(); ++i){
+                array_of_nums.push_back(*i);
+                number_of_numbers++;
+            }
+        }   
+    }
+
+    bity2->read_bits();
+    got_number = gomby->add_bits(bity2->get_bit_array());
+    nums = gomby->decode_nums();
+    for (auto i = nums.begin(); i!=nums.end(); ++i)
+        array_of_nums.push_back(*i);
+    
+    for (auto i = array_of_nums.begin(); i != array_of_nums.end(); i++){
+        cout << *i <<",";
+    }
+
+    cout << "\n";
     return 0;
 }

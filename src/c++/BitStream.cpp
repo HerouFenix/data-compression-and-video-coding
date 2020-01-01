@@ -3,6 +3,7 @@
 #include <exception>
 #include <fstream>
 #include <iterator>
+#include <vector>
 //#include "headers/BitStream.h"
 
 using namespace std;
@@ -10,11 +11,11 @@ using namespace std;
 class BitStream
 {
 private:
-    bool *bit_array;
     int bit_offset;
 
     string file_path;
     int file_size;
+    vector<bool> bit_array;
 
 public:
     BitStream(string fp)
@@ -25,7 +26,13 @@ public:
         file_size = loaded_file.tellg() * 8 + 8;
         loaded_file.close();
 
-        bit_array = new bool[file_size];
+        bit_offset = 0;
+    }
+
+    BitStream()
+    {
+        file_path = "";
+        file_size = 0;
         bit_offset = 0;
     }
 
@@ -47,11 +54,33 @@ public:
         return 1;
     }
 
-    bool *get_bit_array()
+    void delete_bits(int num)
+    {
+        bit_array.erase(bit_array.begin(), bit_array.begin() + num);
+    }
+
+    void reset_bit_array()
+    {
+        bit_array.clear();
+    }
+
+    void add_to_bit_array(vector<bool> array)
+    {
+        for (auto i = array.begin(); i != array.end(); ++i)
+            bit_array.push_back(*i);
+    }
+
+    vector<bool> get_bit_array()
     {
         /********************************************/ /**
         * Function used to return our current bit array
         ***********************************************/
+
+        for (auto i = bit_array.begin(); i != bit_array.end(); i++)
+        {
+            cout << *i << ",";
+        }
+        cout << "\n";
         return bit_array;
     }
 
@@ -64,7 +93,7 @@ public:
     }
 
     /* READ BITS */
-    bool read_bits(int no_of_bits, bool use_offset = 1)
+    bool read_bits(int no_of_bits, bool use_offset = true)
     {
         /********************************************/ /**
         * Function used to read n bits from our file. Read values are put into our
@@ -82,60 +111,61 @@ public:
         }
 
         int bit_counter = 0; //Used to count how many bits we've read
-        
+
         try
         {
-            ifstream loaded_file(file_path);
+            ifstream loaded_file(file_path, ifstream::binary);
 
             if (use_offset && bit_offset + no_of_bits > file_size)
             {
-                cout << bit_offset << "\n";
-                cout << no_of_bits << "\n";
-                cout << "Total "<<no_of_bits+bit_offset<<"\n";
                 cout << "Error. Operation would cause an overflow (Tried to read more bits than the file has)\n";
                 return 0;
             }
-            int initial_offset = bit_offset;
-            if (loaded_file.is_open())
+            if (use_offset)
             {
-                char c;
-                while (loaded_file.get(c))
+                int num_bytes = bit_offset / 8;
+                cout << "bit offset " << bit_offset <<"\n";
+                cout << "skipping " << num_bytes <<" read\n";
+                loaded_file.seekg(num_bytes, ios::beg);
+                bit_counter = num_bytes * 8;
+            }
+
+            int initial_offset = bit_offset;
+
+            char c;
+            while (loaded_file.get(c))
+            {   
+                
+                cout << int((unsigned char)c) << "\n";
+                for (int i = 7; i >= 0; i--)
                 {
-                    for (int i = 7; i >= 0; i--)
+                    if (bit_counter >= (no_of_bits + use_offset * initial_offset))
                     {
-                        if (bit_counter >= no_of_bits + use_offset*initial_offset)
-                        {
-                            loaded_file.close();
-                            return 1;
-                        }
+                        loaded_file.close();
+                        return 1;
+                    }
 
-                        //Used to advance our file pointer until we catch up with our offset
-                        if (use_offset && bit_counter++ < bit_offset)
-                        {
-                            continue;
-                        }
-                        cout << "Advancing bit " << bit_counter << "\n";
+                    //Used to advance our file pointer until we catch up with our offset
+                    if (use_offset && bit_counter++ < bit_offset)
+                    {
+                        continue;
+                    }
 
-                        if (use_offset)
-                        {
-                            bit_array[bit_offset++] = ((c >> i) & 1) == 1; //E.g: 11101010 >> 2 -> 111010 ; 111010 & 1 -> 0 & 1 == 0
-                        }
-                        else
-                        {
-                            bit_array[bit_counter++] = ((c >> i) & 1) == 1; //E.g: 11101010 >> 2 -> 111010 ; 111010 & 1 -> 0 & 1 == 0
-                        }
+                    if (use_offset)
+                    {
+                        bit_array.push_back(((c >> i) & 1) == 1);
+                        bit_offset++; //E.g: 11101010 >> 2 -> 111010 ; 111010 & 1 -> 0 & 1 == 0
+                    }
+                    else
+                    {
+                        bit_array.push_back(((c >> i) & 1) == 1); //E.g: 11101010 >> 2 -> 111010 ; 111010 & 1 -> 0 & 1 == 0
+                        bit_counter++;
                     }
                 }
-
-                loaded_file.close();
-                return 1;
-            }
-            else
-            {
-                cout << "File could not be found\n";
             }
 
             loaded_file.close();
+            return 1;
         }
         catch (exception &e)
         {
@@ -145,7 +175,7 @@ public:
         return 0;
     };
 
-    bool read_bits(bool use_offset = 1)
+    int read_bits(bool use_offset = true)
     {
         /********************************************/ /**
         * Function used to read the entire file (or what's left of it if we have an offset)
@@ -155,9 +185,10 @@ public:
 
         if (use_offset)
         {
-            return read_bits(file_size - bit_offset, use_offset);
+            int bits_to_read = file_size - bit_offset;
+            return read_bits(bits_to_read, use_offset) * bits_to_read;
         }
-        return read_bits(file_size, use_offset);
+        return read_bits(file_size, use_offset) * file_size;
     }
 
     /* WRITE BITS */
@@ -179,7 +210,7 @@ public:
 
         try
         {
-            ofstream write_file(file_path);
+            ofstream write_file(file_path, ios_base::app);
 
             int remainder = no_of_bits % 8;
             char c = 0;
@@ -187,33 +218,23 @@ public:
             //int array_size = distance(begin(bit_array), end(bit_array)); what
             //cout << array_size;
 
-            for (int i = 0; i < no_of_bits; i++)
-            {
-                bool bit;
-                /*if (i >= array_size)
-                {
-                    cout << "\nout of bounds";
-                    bit = 0;
-                }
-                else
-                {*/
-                bit = bit_array[i];
-                //}
+            bool bit;
 
-                c |= bit << (7 - i % 8);
+            for (int i = 0; i < no_of_bits - remainder; i++)
+            {
+
+                bit = bit_array[i];
 
                 if (i % 8 == 0 && i != 0)
                 {
-                    write_file.write(&c, 1);
+                    write_file << c;
                     c = 0;
                 }
+                c |= int(bit) << (7 - i % 8);
             }
 
-            for (int i = remainder; i < 8; i++)
-            {
-                c |= 0 << (7 - i % 8);
-            }
-            write_file.write(&c, 1);
+            delete_bits(no_of_bits - remainder);
+            write_file << c; 
             write_file.close();
 
             return 1;
@@ -233,23 +254,36 @@ public:
         *
         * @param file_path The name of the file we want to write to
         ***********************************************/
-        return write_bits(file_path, bit_offset);
+        return write_bits(file_path, bit_array.size());
+    }
+
+    void close(string file_path)
+    {
+        ofstream write_file(file_path, ios_base::app);
+        char c = 0;
+        for (int i = 0; i < bit_array.size(); i++)
+        {
+            bool bit = bit_array.at(i);
+            c |= int(bit) << (7 - i % 8);
+        }
+        write_file << c;
+        write_file.close();
     }
 };
 
-
+/**
 int main()
 {
     BitStream *test_stream = new BitStream("../../a_love_story.txt");
     cout << "First read through the 16 bits\n";
     test_stream->read_bits(16);
-    bool *oof = test_stream->get_bit_array();
+    vector<bool> oof = test_stream->get_bit_array();
     cout << "Second read through the 16 bits\n";
     test_stream->read_bits(16, 0);
-    bool *oof_2 = test_stream->get_bit_array();
+    vector<bool> oof_2 = test_stream->get_bit_array();
     cout << "Third read, getting the next 16 bits\n";
     test_stream->read_bits(16);
-    bool *oof_3 = test_stream->get_bit_array();
+    vector<bool> oof_3 = test_stream->get_bit_array();
     for (int i = 0; i < 16; i++)
     {
         cout << oof[i];
@@ -268,3 +302,4 @@ int main()
     test_stream->write_bits("../../a_poop_story_2.txt");
 
 }
+**/
