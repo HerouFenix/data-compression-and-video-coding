@@ -11,7 +11,6 @@ class BitStream:
         self.bit_array = []
 
         self.bit_offset = 0
-        self.input_stream = None
 
     # GETTERS & RESETTERS #
     def set_offset(self, value):
@@ -32,7 +31,6 @@ class BitStream:
         self.bit_array = self.bit_array[num:]
     
     def reset_bit_array(self):
-        print(len(self.bit_array))
         self.bit_array=[]
     
     def add_to_bit_array(self, array):
@@ -69,7 +67,6 @@ class BitStream:
             print("Invalid number of bits. Values must be positive\n")
             return None
         
-        char_pos =0
         if allbits:
             print("I'm doing this function again")
 
@@ -85,17 +82,16 @@ class BitStream:
                 bit_counter = 0
                 if use_offset:
                     num_bytes = self.bit_offset//8
+                    print("bit offset", self.bit_offset)
+                    print("skipping", num_bytes,"read")
                     loaded_file.read(num_bytes)
                     bit_counter = num_bytes*8
 
                 initial_offset = self.bit_offset                
                 while True:
-                    if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
-                        return 1
                     a = loaded_file.read(1)
-                       
                     byte = ord(a)
-                    
+                    print("byte: ", byte)
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                             return 1

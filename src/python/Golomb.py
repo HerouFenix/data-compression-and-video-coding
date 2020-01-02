@@ -96,7 +96,7 @@ class Golomb:
 
 def main():
     gomby = Golomb(4) #Kawaii desu-nee?
-    bity = BitStream.BitStream()
+    ''' bity = BitStream.BitStream()
     with open("test.bin", "wb") as f:
         f.write(b"")
 
@@ -112,14 +112,17 @@ def main():
 
     bity.write_allbits("test.bin")
     bity.close("test.bin")
-
+    '''
     bity2 = BitStream.BitStream("test.bin")
     array_of_nums = []
     number_of_numbers = 0
+    
     while bity2.read_bits(20):
         got_number = gomby.add_bits(bity2.get_bit_array())
+        [print(1 if element else 0, ",", end="", sep="") for element in bity2.get_bit_array()]
+        print()
         bity2.delete_bits(20)
-
+        
         if got_number:
             nums = gomby.decode_nums()
             array_of_nums += nums
@@ -127,6 +130,8 @@ def main():
     
     bity2.read_allbits()
     got_number = gomby.add_bits(bity2.get_bit_array())
+    [print(1 if element else 0, ",", end="", sep="") for element in bity2.get_bit_array()]
+    print()
     nums = gomby.decode_nums()
     array_of_nums += nums
     print(array_of_nums)
