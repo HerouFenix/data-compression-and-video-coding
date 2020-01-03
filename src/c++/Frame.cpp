@@ -22,6 +22,8 @@ class Frame {
             width = w;
         }
 
+        virtual void set_frame(ifstream& stream) = 0;
+
         int predictor(char mode, int a, int b, int c){
             if (mode == '1')
                 return a;
@@ -223,7 +225,7 @@ class Frame444: public Frame {
             limit_to_convert = h*w*3;
         }
 
-        void set_frame(ifstream stream){
+        void set_frame(ifstream& stream){
             int y_data[height*width], u_data[height*width], v_data[height*width];
             for (int i = 0; i < height*width; i++)
                 y_data[i] = int((unsigned char)stream.get());
@@ -256,7 +258,7 @@ class Frame422: public Frame {
             limit_to_convert = h*w*2 + (h/2)*(w/2);
         }
 
-        void set_frame(ifstream stream){
+        void set_frame(ifstream& stream){
             int y_data[height*width], u_data[height*width], v_data[height/2*width/2];
             for (int i = 0; i < height*width; i++)
                 y_data[i] = int((unsigned char)stream.get());
@@ -294,7 +296,7 @@ class Frame420: public Frame {
             limit_to_convert = h*w + (h/2)*(w/2)*2;
         }
 
-        void set_frame(ifstream stream){
+        void set_frame(ifstream& stream){
             int y_data[height*width], u_data[height*width], v_data[height/2*width/2];
             for (int i = 0; i < height*width; i++)
                 y_data[i] = int((unsigned char)stream.get());

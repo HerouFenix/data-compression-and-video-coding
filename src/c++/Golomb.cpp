@@ -148,7 +148,7 @@ public:
     }
 
 };
-
+/*
 int main()
 {
     Golomb *gomby = new Golomb(4);
@@ -205,4 +205,4 @@ int main()
 
     cout << "\n";
     return 0;
-}
+}*/
