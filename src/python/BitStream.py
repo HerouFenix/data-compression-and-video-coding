@@ -82,8 +82,6 @@ class BitStream:
                 bit_counter = 0
                 if use_offset:
                     num_bytes = self.bit_offset//8
-                    print("bit offset", self.bit_offset)
-                    print("skipping", num_bytes,"read")
                     loaded_file.read(num_bytes)
                     bit_counter = num_bytes*8
 
@@ -91,7 +89,6 @@ class BitStream:
                 while True:
                     a = loaded_file.read(1)
                     byte = ord(a)
-                    print("byte: ", byte)
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                             return 1

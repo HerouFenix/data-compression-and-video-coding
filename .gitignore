@@ -166,3 +166,7 @@ dmypy.json
 
 # Test folder
 tests/
+
+#Open cv stuff
+opencv/
+opencv_contrib/

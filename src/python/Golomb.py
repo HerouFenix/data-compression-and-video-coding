@@ -1,5 +1,6 @@
 import math
 import BitStream
+from time import time
 
 class Golomb:
     def __init__(self,m):
@@ -113,14 +114,15 @@ def main():
     bity.write_allbits("test.bin")
     bity.close("test.bin")
     '''
+    start = time()
+
     bity2 = BitStream.BitStream("test.bin")
     array_of_nums = []
     number_of_numbers = 0
     
     while bity2.read_bits(20):
         got_number = gomby.add_bits(bity2.get_bit_array())
-        [print(1 if element else 0, ",", end="", sep="") for element in bity2.get_bit_array()]
-        print()
+        
         bity2.delete_bits(20)
         
         if got_number:
@@ -130,10 +132,10 @@ def main():
     
     bity2.read_allbits()
     got_number = gomby.add_bits(bity2.get_bit_array())
-    [print(1 if element else 0, ",", end="", sep="") for element in bity2.get_bit_array()]
-    print()
+    
     nums = gomby.decode_nums()
     array_of_nums += nums
+    print("it took ", time() - start)
     print(array_of_nums)
 
 if __name__ == "__main__":

@@ -355,12 +355,15 @@ class Frame:
             :self.height, :self.width, :].astype(numpy.float)
         self.YUV[:, :, 0] = self.YUV[:, :, 0] - 16   # Offset Y by 16
         self.YUV[:, :, 1:] = self.YUV[:, :, 1:] - 128  # Offset UV by 128
+        
         M = numpy.array([[1, 1.172,  0.000],    # B
                          [1, -0.344, -0.714],    # G
                          [1,  0.000,  1.402]])   # R
 
         # Take the dot product with the matrix to produce BGR output
         BGR = self.YUV.dot(M.T).clip(0, 255).astype(numpy.uint8)
+
+        print(BGR.shape)
 
         return BGR
 
@@ -401,7 +404,6 @@ class Frame422(Frame):
     def set_frame(self, stream):
         self.Y = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *
                                 self.height).reshape((self.height, self.width))
-        self.limit_to_convert = height*width*2
         
         # Load the UV (chrominance) data from the stream, and double its size
         self.U = numpy.fromfile(stream, dtype=numpy.uint8, count=self.width *

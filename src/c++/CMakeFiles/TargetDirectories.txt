@@ -1,0 +1,3 @@
+/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/rebuild_cache.dir
+/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/VideoPlayer.dir
+/home/pedro/CSLP/data-compression-and-video-coding/src/c++/CMakeFiles/edit_cache.dir

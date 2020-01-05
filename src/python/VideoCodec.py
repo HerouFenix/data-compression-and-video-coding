@@ -84,14 +84,20 @@ class VideoCodec:
             array_of_nums = []
 
             counter = 0
+            counter_bits = 0
             while read_stream.read_bits(5000):
                 got_number = self.gomby.add_bits(read_stream.get_bit_array())
+                
                 read_stream.delete_bits(5000)
+                counter_bits += 1
+
 
                 if got_number:
                     nums = self.gomby.decode_nums()
                     number_of_numbers += len(nums)
                     array_of_nums += nums
+                    print("Decompressed", number_of_numbers)
+                    print("Need to get", self.frame.limit_to_convert)
                 
                 if number_of_numbers >= self.frame.limit_to_convert:
                     counter += 1
@@ -147,7 +153,6 @@ class VideoCodec:
 
             counter = 0
 
-
             while True:
                 start_time = time()
                 if counter > 2:
@@ -168,9 +173,7 @@ class VideoCodec:
                 u = compressed_frame[1]
                 v = compressed_frame[2]
     
-                number_of_numbers = 0
                 for x in np.nditer(y):
-                    number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
                 #bit_stream.write_allbits(compress_path)
@@ -178,8 +181,6 @@ class VideoCodec:
                 print("Finished compressing Y")
 
                 for x in np.nditer(u):
-                    number_of_numbers += 1
-
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
 
                 #bit_stream.write_allbits(compress_path)
@@ -187,7 +188,6 @@ class VideoCodec:
                 print("Finished compressing U")
 
                 for x in np.nditer(v):
-                    number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
                 
                 bit_stream.write_allbits(compress_path)
@@ -197,12 +197,12 @@ class VideoCodec:
             bit_stream.close(compress_path)
 
 if __name__ == "__main__":
-    codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
+    #codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
     #codec.play_video()
     #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m","JPEG-2")
-    compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
-    start_timer = time()
+    compressed_codec = VideoCodec("../../tests/vids/ducks_take_off.c4m")
+    #start_timer = time()
     compressed_codec.decompress_video("ducks_take_off.y4m")
-    print("It took ", time() - start_timer)
+    #print("It took ", time() - start_timer)
     codec = VideoCodec("ducks_take_off.y4m")
     codec.play_video()

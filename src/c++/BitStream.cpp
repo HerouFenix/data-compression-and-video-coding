@@ -66,8 +66,8 @@ public:
 
     void add_to_bit_array(vector<bool> array)
     {
-        for (auto i = array.begin(); i != array.end(); ++i)
-            bit_array.push_back(*i);
+        bit_array.insert(bit_array.end(), array.begin(), array.end());
+        
     }
 
     vector<bool> get_bit_array()
@@ -76,11 +76,6 @@ public:
         * Function used to return our current bit array
         ***********************************************/
 
-        for (auto i = bit_array.begin(); i != bit_array.end(); i++)
-        {
-            cout << *i << ",";
-        }
-        cout << "\n";
         return bit_array;
     }
 
@@ -124,8 +119,6 @@ public:
             if (use_offset)
             {
                 int num_bytes = bit_offset / 8;
-                cout << "bit offset " << bit_offset <<"\n";
-                cout << "skipping " << num_bytes <<" read\n";
                 loaded_file.seekg(num_bytes, ios::beg);
                 bit_counter = num_bytes * 8;
             }
@@ -136,7 +129,6 @@ public:
             while (loaded_file.get(c))
             {   
                 
-                cout << int((unsigned char)c) << "\n";
                 for (int i = 7; i >= 0; i--)
                 {
                     if (bit_counter >= (no_of_bits + use_offset * initial_offset))
@@ -271,7 +263,7 @@ public:
     }
 };
 
-/**
+/*
 int main()
 {
     BitStream *test_stream = new BitStream("../../a_love_story.txt");
@@ -302,4 +294,4 @@ int main()
     test_stream->write_bits("../../a_poop_story_2.txt");
 
 }
-**/
+*/
