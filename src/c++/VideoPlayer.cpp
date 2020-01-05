@@ -118,18 +118,19 @@ public:
 
                 frame->decompress_frame(decompress_mode);
                 cout << "Finisheed decompressing frame, now moved on to write\n";
-                Mat Y_data = frame->Y_frame();
-                Y_data.convertTo(Y_data, CV_8UC1);
-                write_stream.write(Y_data.ptr<char>(0), (Y_data.dataend - Y_data.datastart));
-                ~Y_data;
-                Mat U_data = frame->U_frame();
-                U_data.convertTo(U_data, CV_8UC1);
-                write_stream.write(U_data.ptr<char>(0), (U_data.dataend - U_data.datastart));
-                ~U_data;
-                Mat V_data = frame->V_frame();
-                V_data.convertTo(V_data, CV_8UC1);
-                write_stream.write(V_data.ptr<char>(0), (V_data.dataend - V_data.datastart));
-                ~V_data;
+
+                Mat M = frame->Y_frame();
+                M.convertTo(M, CV_8UC1);
+                write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+
+                M = frame->U_frame();
+                M.convertTo(M, CV_8UC1);
+                write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+
+                M = frame->V_frame();
+                M.convertTo(M, CV_8UC1);
+                write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+                ~M;
 
                 write_stream << "FRAME\n";
 
@@ -147,18 +148,18 @@ public:
             frame->set_frame_with_arr(array_of_nums);
             frame->decompress_frame(decompress_mode);
 
-            Mat Y_data = frame->Y_frame();
-            Y_data.convertTo(Y_data, CV_8UC1);
-            write_stream.write(Y_data.ptr<char>(0), (Y_data.dataend - Y_data.datastart));
-            ~Y_data;
-            Mat U_data = frame->U_frame();
-            U_data.convertTo(U_data, CV_8UC1);
-            write_stream.write(U_data.ptr<char>(0), (U_data.dataend - U_data.datastart));
-            ~U_data;
-            Mat V_data = frame->V_frame();
-            V_data.convertTo(V_data, CV_8UC1);
-            write_stream.write(V_data.ptr<char>(0), (V_data.dataend - V_data.datastart));
-            ~V_data;
+            Mat M = frame->Y_frame();
+            M.convertTo(M, CV_8UC1);
+            write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+
+            M = frame->U_frame();
+            M.convertTo(M, CV_8UC1);
+            write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+
+            M = frame->V_frame();
+            M.convertTo(M, CV_8UC1);
+            write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+            ~M;
         }
 
         cout << "Finished decompressing frame \n";
@@ -213,6 +214,7 @@ public:
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
                     bit_stream->add_to_bit_array(gomby->encode(M.at<int>(i, j)));
+            ~M;
             bit_stream->write_bits(compress_path);
 
         }
