@@ -43,7 +43,7 @@ public:
         return V;
     }
 
-    unsigned char predictor(char mode, int a, int b, int c)
+    int predictor(char mode, int a, int b, int c)
     {
         if (mode == '1')
             return a;
@@ -70,10 +70,11 @@ public:
 
     void compress_frame(char mode)
     {
+        cout << mode << endl;
         bool u_skip = Y.rows != U.rows;
         bool v_skip = Y.rows != V.rows;
 
-        unsigned char predictor_y, predictor_u, predictor_v;
+        int predictor_y, predictor_u, predictor_v;
 
         for (int i = height - 1; i >= 0; i--)
         {
@@ -144,7 +145,7 @@ public:
                     V.at<int>(i, j) -= predictor_v;
             }
         }
-        }
+    }
 
     void decompress_frame(char mode)
     {
@@ -157,6 +158,7 @@ public:
         {
             for (int j = 0; j < width; j++)
             {
+
                 if (mode == '1')
                 {
                     if (j > 0)
@@ -243,7 +245,7 @@ public:
         {
             for (int j = 0; j < width; j++)
             {
-                y_value = Y.at<unsigned char>(i, j) - 16;
+                y_value = Y.at<int>(i, j) - 16;
                 u_value = U.at<unsigned char>(i, j) - 128;
                 v_value = V.at<unsigned char>(i, j) - 128;
                 
@@ -342,7 +344,7 @@ public:
 
         Y = cv::Mat(height, width, CV_32SC1, y_data.data());
         U = cv::Mat(height, width, CV_32SC1, u_data.data());
-        V = cv::Mat(height/2, width/2, CV_32SC1, v_data.data());
+        V = cv::Mat(height / 2, width / 2, CV_32SC1, v_data.data());
     }
     /*
     cv::Mat show_frame()
@@ -389,16 +391,9 @@ public:
         vector<int> v_data(stream.begin() + height * width + height / 2 * width / 2, stream.begin() + limit_to_convert);
 
         Y = cv::Mat(height, width, CV_32SC1, y_data.data());
-        U = cv::Mat(height/2, width/2, CV_32SC1, u_data.data());
-        V = cv::Mat(height/2, width/2, CV_32SC1, v_data.data());
+        U = cv::Mat(height / 2, width / 2, CV_32SC1, u_data.data());
+        V = cv::Mat(height / 2, width / 2, CV_32SC1, v_data.data());
 
-        y_data.resize(0);
-        y_data.shrink_to_fit();
-        u_data.resize(0);
-        u_data.shrink_to_fit();
-        v_data.resize(0);
-        v_data.shrink_to_fit();
-        
     }
     /*
 

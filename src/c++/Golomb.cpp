@@ -144,7 +144,9 @@ public:
         return value;
     }
 };
+
 /*
+
 int main()
 {
     Golomb *gomby = new Golomb(4);

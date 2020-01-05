@@ -87,10 +87,10 @@ public:
         Golomb *gomby = new Golomb(gomby_param);
 
         BitStream *read_stream = new BitStream(file_path);
-        read_stream->set_offset(header.size() * 8);
+        read_stream->set_offset(header.size() * 8 + 8);
 
         ofstream write_stream(decompress_path, ios::binary);
-        write_stream << header;
+        write_stream << header << "\n";
         write_stream << "FRAME\n";
 
         int number_of_numbers = 0, counter = 0, counter_bits = 0;
@@ -118,13 +118,22 @@ public:
 
                 frame->decompress_frame(decompress_mode);
                 cout << "Finisheed decompressing frame, now moved on to write\n";
-                write_stream << frame->Y_frame();
-                write_stream << frame->U_frame();
-                write_stream << frame->V_frame();
+                Mat Y_data = frame->Y_frame();
+                Y_data.convertTo(Y_data, CV_8UC1);
+                write_stream.write(Y_data.ptr<char>(0), (Y_data.dataend - Y_data.datastart));
+                ~Y_data;
+                Mat U_data = frame->U_frame();
+                U_data.convertTo(U_data, CV_8UC1);
+                write_stream.write(U_data.ptr<char>(0), (U_data.dataend - U_data.datastart));
+                ~U_data;
+                Mat V_data = frame->V_frame();
+                V_data.convertTo(V_data, CV_8UC1);
+                write_stream.write(V_data.ptr<char>(0), (V_data.dataend - V_data.datastart));
+                ~V_data;
+
                 write_stream << "FRAME\n";
 
                 cout << "Finished compressing frame\n";
-                return true;
             }
         }
 
@@ -138,9 +147,18 @@ public:
             frame->set_frame_with_arr(array_of_nums);
             frame->decompress_frame(decompress_mode);
 
-            write_stream << frame->Y_frame();
-            write_stream << frame->U_frame();
-            write_stream << frame->V_frame();
+            Mat Y_data = frame->Y_frame();
+            Y_data.convertTo(Y_data, CV_8UC1);
+            write_stream.write(Y_data.ptr<char>(0), (Y_data.dataend - Y_data.datastart));
+            ~Y_data;
+            Mat U_data = frame->U_frame();
+            U_data.convertTo(U_data, CV_8UC1);
+            write_stream.write(U_data.ptr<char>(0), (U_data.dataend - U_data.datastart));
+            ~U_data;
+            Mat V_data = frame->V_frame();
+            V_data.convertTo(V_data, CV_8UC1);
+            write_stream.write(V_data.ptr<char>(0), (V_data.dataend - V_data.datastart));
+            ~V_data;
         }
 
         cout << "Finished decompressing frame \n";
@@ -180,8 +198,8 @@ public:
             getline(stream, buffer);
 
             frame->set_frame(stream);
-
             frame->compress_frame(mode.at(mode.size() - 1));
+
             Mat M = frame->Y_frame();
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
@@ -196,8 +214,11 @@ public:
                 for (int j = 0; j < M.cols; j++)
                     bit_stream->add_to_bit_array(gomby->encode(M.at<int>(i, j)));
             bit_stream->write_bits(compress_path);
-            bit_stream->close(compress_path);
+
         }
+        bit_stream->close(compress_path); 
+
+
         writer.close();
         return true;
     }
@@ -280,19 +301,14 @@ string type2str(int type)
 
 int main()
 {
-    chrono::steady_clock::time_point begin = chrono::steady_clock::now();
-
-    VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");
-    vp.compress_video("../../tests/vids/ducks_take_off.c4m", "JPEG-2");
-
-    chrono::steady_clock::time_point end = chrono::steady_clock::now();
-
-    cout << "Time difference = " << chrono::duration_cast<chrono::seconds>(end - begin).count() << "[µs]\n";
-
+    //VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");
+    //vp.compress_video("../../tests/vids/ducks_take_off.c4m", "JPEG-1");
 
     VideoPlayer vp2("../../tests/vids/ducks_take_off.c4m");
     vp2.decompress_video("ducks_take_off_c.y4m");
     cout << "finshed compressing\n";
+    
+    return 1;
     VideoCapture cap("ducks_take_off_c.y4m");
 
     while (1)
@@ -313,7 +329,7 @@ int main()
         imshow("Frame", frame);
 
         // Press  ESC on keyboard to exit
-        char c = (char)waitKey(25);
+        char c = (char)waitKey();
         if (c == 27)
             break;
     }

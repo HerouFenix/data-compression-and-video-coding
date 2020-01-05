@@ -57,11 +57,13 @@ public:
     void delete_bits(int num)
     {
         bit_array.erase(bit_array.begin(), bit_array.begin() + num);
+        bit_array.shrink_to_fit();
     }
 
     void reset_bit_array()
     {
         bit_array.clear();
+        bit_array.shrink_to_fit();
     }
 
     void add_to_bit_array(vector<bool> array)
