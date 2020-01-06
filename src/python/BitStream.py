@@ -53,7 +53,7 @@ class BitStream:
         self.bit_offset += self.bit_offset%8
 
     # READ BITS #
-    def read_bits(self, no_of_bits, use_offset=True, allbits=False):
+    def read_bits(self, no_of_bits, use_offset=True):
         """
         # Function used to read n bits from our file. Read values are put into our
         # bit_array
@@ -69,11 +69,8 @@ class BitStream:
             return None
         
         char_pos =0
-        if allbits:
-            print("I'm doing this function again")
 
         try:
-            
             with open(self.file_path, "rb") as loaded_file:
                 if (use_offset and self.bit_offset + no_of_bits > self.file_size):
                     print(
@@ -91,9 +88,8 @@ class BitStream:
                 while True:
                     if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
                         return 1
-                    a = loaded_file.read(1)
-                       
-                    byte = ord(a)
+
+                    byte = ord(loaded_file.read(1))
                     
                     for i in range(7, -1, -1):
                         if bit_counter >= no_of_bits + int(use_offset)*initial_offset:
@@ -106,11 +102,7 @@ class BitStream:
                             self.bit_array.append(((byte >> i) & 1) == 1)
                             self.bit_offset += 1
                         else:
-                            # E.g: 11101010 >> 2 -> 111010 111010 & 1 -> 0 & 1 == 0
                             self.bit_array[bit_counter-1] = ((byte >> i) & 1) == 1                     
- 
-            if allbits:
-                print("everything went allright")    
             return 1
 
         except Exception as e:
@@ -128,7 +120,7 @@ class BitStream:
 
         if (use_offset):
             bits_to_read = self.file_size - self.bit_offset
-            return self.read_bits(bits_to_read, use_offset, allbits=True) * bits_to_read
+            return self.read_bits(bits_to_read, use_offset) * bits_to_read
         return self.read_bits(self.file_size, use_offset)  * self.file_size
 
     # WRITE BITS #

@@ -17,7 +17,7 @@ class Golomb:
         quotient = value // self.encoding_parameter
         remainder = value % self.encoding_parameter
 
-        code = code + [True] * quotient + [False]
+        code = code + [True] * quotient + [False]   #Encode the quotient - UNARY
         
         for i in range(self.b_param-1, -1, -1):
             code.append(bool((remainder >> i) & 1))
