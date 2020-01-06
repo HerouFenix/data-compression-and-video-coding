@@ -153,7 +153,11 @@ public:
         bool u_skip = Y.rows != U.rows;
         bool v_skip = Y.rows != V.rows;
         cout << "starting decompression process 2\n";
-        
+        if (debug){
+            cout << Y << endl;
+            cout << U << endl;
+            cout << V << endl;
+        }
         int predictor_y, predictor_u, predictor_v;
         for (int i = 0; i < height; i++)
         {
@@ -225,51 +229,6 @@ public:
             }
         }
     }
-    /*
-    virtual cv::Mat show_frame()
-    {
-        float M_data[9] = {1, 1.172, 0, 1, -0.344, -0.714, 1, 0, 1.402};
-        cv::Mat M = cv::Mat(3, 3, CV_32F, M_data);
-
-        vector<Mat> channels;
-        channels.push_back(Y);
-        channels.push_back(U);
-        channels.push_back(V);
-        merge(channels, YUV);
-
-        int sz[] = {height, width};
-        cv::Mat BGR(2, sz, CV_32SC1C3);
-        int y_value, u_value, v_value;
-        int b_value, g_value, r_value;
-        for (int i = 0; i < height; i++)
-        {
-            for (int j = 0; j < width; j++)
-            {
-                y_value = Y.at<int>(i, j) - 16;
-                u_value = U.at<unsigned char>(i, j) - 128;
-                v_value = V.at<unsigned char>(i, j) - 128;
-                
-                b_value = y_value + u_value*1.172;
-                if (b_value<=0) b_value = 0;
-                if (b_value>255) b_value = 255;
-
-                g_value = y_value - u_value*0.344 - 0.714*v_value;
-                if (g_value <= 0) g_value = 0;
-                if (g_value > 255) g_value = 255;
-
-                r_value = y_value +1.402*v_value;
-                if (r_value <= 0) r_value = 0;
-                if (r_value > 255) r_value = 255;
-
-                BGR.at<unsigned char>(i, j, 0) = b_value;
-                BGR.at<unsigned char>(i, j, 1) = g_value;
-                BGR.at<unsigned char>(i, j, 2) = r_value;
-                
-            }
-        }
-        
-        return BGR;
-    }*/
 
     int get_limit()
     {
@@ -288,9 +247,11 @@ public:
     void set_frame(ifstream &stream)
     {
         int y_data[height * width], u_data[height * width], v_data[height * width];
+        
         for (int i = 0; i < height * width; i++)
             y_data[i] = int((unsigned char)stream.get());
         Y = cv::Mat(height, width, CV_32SC1, y_data);
+        
         for (int i = 0; i < height * width; i++)
             u_data[i] = int((unsigned char)stream.get());
         U = cv::Mat(height, width, CV_32SC1, u_data);
@@ -346,12 +307,6 @@ public:
         U = cv::Mat(height, width, CV_32SC1, u_data.data());
         V = cv::Mat(height / 2, width / 2, CV_32SC1, v_data.data());
     }
-    /*
-    cv::Mat show_frame()
-    {
-        V = cv::repeat(V, 2, 2);
-        return Frame::show_frame();
-    }*/
 };
 
 class Frame420 : public Frame
@@ -395,13 +350,5 @@ public:
         V = cv::Mat(height / 2, width / 2, CV_32SC1, v_data.data());
 
     }
-    /*
 
-    cv::Mat show_frame()
-    {
-        U = cv::repeat(U, 2, 2);
-        V = cv::repeat(V, 2, 2);
-        
-        return Frame::show_frame();
-    }*/
 };

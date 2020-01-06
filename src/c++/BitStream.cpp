@@ -1,8 +1,8 @@
-#include <string>
 #include <iostream>
 #include <exception>
 #include <fstream>
 #include <iterator>
+#include <string>
 #include <vector>
 //#include "headers/BitStream.h"
 

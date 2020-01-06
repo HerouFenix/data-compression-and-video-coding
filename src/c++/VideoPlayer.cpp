@@ -69,6 +69,37 @@ public:
         }
     }
 
+    void play_video(){
+        VideoCapture cap(file_path);
+
+        while (1)
+        {
+
+            Mat frame;
+            // Capture frame-by-frame
+            cap >> frame;
+
+            // If the frame is empty, break immediately
+            if (frame.empty())
+                break;
+
+            // Display the resulting frame
+            imshow("Frame", frame);
+
+            // Press  ESC on keyboard to exit
+            char c = (char)waitKey(25);
+            if (c == 27)
+                break;
+        }
+
+        // When everything done, release the video capture object
+        cap.release();
+
+        // Closes all the frames
+        destroyAllWindows();
+
+    }
+
     bool decompress_video(string decompress_path)
     {
 
@@ -105,7 +136,6 @@ public:
             if (got_number){
                 gomby->decode_nums(&array_of_nums);
                 cout << "Have decoded " << array_of_nums.size() << endl;
-                cout << "Need to get " << frame->get_limit() << endl;
             }
 
             if (array_of_nums.size() >= frame->get_limit())
@@ -113,7 +143,7 @@ public:
                 counter += 1;
                 cout << "Decompressing frame: " << counter << "\n";
                 frame->set_frame_with_arr(array_of_nums);
-                cout << "set frame \n";
+
                 array_of_nums.erase(array_of_nums.begin(), array_of_nums.begin() + frame->get_limit());
                 array_of_nums.shrink_to_fit();
 
@@ -224,82 +254,8 @@ public:
         writer.close();
         return true;
     }
-    /*
-    void play_video()
-    {
-        string buffer;
-        Frame *frame;
-        char c = frame_type.at(frame_type.size() - 1);
-        if (c == '4')
-            frame = new Frame444(height, width);
-        if (c == '2')
-            frame = new Frame422(height, width);
-        if (c == '0')
-            frame = new Frame420(height, width);
-
-        ifstream stream(file_path, ios::binary);
-        getline(stream, buffer);
-        while (true)
-        {
-            try
-            {
-                getline(stream, buffer);
-                frame->set_frame(stream);
-                cout << "about to build frame\n";
-                namedWindow("Display window");
-                imshow("Display window", frame->show_frame());
-            }
-            catch (exception &e)
-            {
-                cout << e.what() << "\n";
-            }
-        }
-        stream.close();
-    }*/
+  
 };
-
-//Here is a handy function you can use to help with identifying your opencv matrices at runtime. I find it useful for debugging, at least.
-
-string type2str(int type)
-{
-    string r;
-
-    uchar depth = type & CV_MAT_DEPTH_MASK;
-    uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-    switch (depth)
-    {
-    case CV_8U:
-        r = "8U";
-        break;
-    case CV_8S:
-        r = "8S";
-        break;
-    case CV_16U:
-        r = "16U";
-        break;
-    case CV_16S:
-        r = "16S";
-        break;
-    case CV_32S:
-        r = "32S";
-        break;
-    case CV_32F:
-        r = "32F";
-        break;
-    case CV_64F:
-        r = "64F";
-        break;
-    default:
-        r = "User";
-        break;
-    }
-
-    r += "C";
-    r += (chans + '0');
-
-    return r;
-}
 
 int main()
 {
@@ -311,38 +267,6 @@ int main()
     cout << "finshed compressing\n";
     
     return 1;
-    VideoCapture cap("ducks_take_off_c.y4m");
-
-    while (1)
-    {
-
-        Mat frame;
-        // Capture frame-by-frame
-        cap >> frame;
-        string ty = type2str(frame.type());
-        printf("Matrix: %s %dx%d \n", ty.c_str(), frame.cols, frame.rows);
-        break;
-
-        // If the frame is empty, break immediately
-        if (frame.empty())
-            break;
-
-        // Display the resulting frame
-        imshow("Frame", frame);
-
-        // Press  ESC on keyboard to exit
-        char c = (char)waitKey();
-        if (c == 27)
-            break;
-    }
-
-    // When everything done, release the video capture object
-    cap.release();
-
-    // Closes all the frames
-    destroyAllWindows();
-
-    return 0;
 
     //VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");
     //vp.play_video();

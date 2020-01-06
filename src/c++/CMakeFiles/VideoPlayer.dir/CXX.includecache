@@ -7,8 +7,6 @@
 #IncludeRegexTransform: 
 
 /home/pedro/CSLP/data-compression-and-video-coding/src/c++/BitStream.cpp
-string
--
 iostream
 -
 exception
@@ -16,6 +14,8 @@ exception
 fstream
 -
 iterator
+-
+string
 -
 vector
 -
