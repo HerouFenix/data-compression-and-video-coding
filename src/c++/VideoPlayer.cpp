@@ -69,7 +69,8 @@ public:
         }
     }
 
-    void play_video(){
+    void play_video()
+    {
         VideoCapture cap(file_path);
 
         while (1)
@@ -97,7 +98,6 @@ public:
 
         // Closes all the frames
         destroyAllWindows();
-
     }
 
     bool decompress_video(string decompress_path)
@@ -133,7 +133,8 @@ public:
             got_number = gomby->add_bits(read_stream->get_bit_array());
             read_stream->delete_bits(5000);
 
-            if (got_number){
+            if (got_number)
+            {
                 gomby->decode_nums(&array_of_nums);
                 cout << "Have decoded " << array_of_nums.size() << endl;
             }
@@ -153,14 +154,18 @@ public:
                 Mat M = frame->Y_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
-                
+                M.convertTo(M, CV_32SC1);
+
+
                 M = frame->U_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+                M.convertTo(M, CV_32SC1);
 
                 M = frame->V_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
+                M.convertTo(M, CV_32SC1);
 
                 write_stream << "FRAME\n";
 
@@ -189,7 +194,6 @@ public:
             M = frame->V_frame();
             M.convertTo(M, CV_8UC1);
             write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
-            
         }
 
         cout << "Finished decompressing frame \n";
@@ -235,7 +239,7 @@ public:
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
                     bit_stream->add_to_bit_array(gomby->encode(M.at<int>(i, j)));
-            
+
             M = frame->U_frame();
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
@@ -244,18 +248,56 @@ public:
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
                     bit_stream->add_to_bit_array(gomby->encode(M.at<int>(i, j)));
-            
+
             bit_stream->write_bits(compress_path);
-
         }
-        bit_stream->close(compress_path); 
-
+        bit_stream->close(compress_path);
 
         writer.close();
         return true;
     }
-  
 };
+
+string type2str(int type)
+{
+    string r;
+
+    uchar depth = type & CV_MAT_DEPTH_MASK;
+    uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+    switch (depth)
+    {
+    case CV_8U:
+        r = "8U";
+        break;
+    case CV_8S:
+        r = "8S";
+        break;
+    case CV_16U:
+        r = "16U";
+        break;
+    case CV_16S:
+        r = "16S";
+        break;
+    case CV_32S:
+        r = "32S";
+        break;
+    case CV_32F:
+        r = "32F";
+        break;
+    case CV_64F:
+        r = "64F";
+        break;
+    default:
+        r = "User";
+        break;
+    }
+
+    r += "C";
+    r += (chans + '0');
+
+    return r;
+}
 
 int main()
 {
@@ -265,7 +307,7 @@ int main()
     VideoPlayer vp2("../../tests/vids/ducks_take_off.c4m");
     vp2.decompress_video("ducks_take_off_c.y4m");
     cout << "finshed compressing\n";
-    
+
     return 1;
 
     //VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");

@@ -108,7 +108,7 @@ public:
         }
 
         int bit_counter = 0; //Used to count how many bits we've read
-
+        
         try
         {
             ifstream loaded_file(file_path, ifstream::binary);
@@ -208,9 +208,6 @@ public:
 
             int remainder = no_of_bits % 8;
             char c = 0;
-
-            //int array_size = distance(begin(bit_array), end(bit_array)); what
-            //cout << array_size;
 
             bool bit;
 

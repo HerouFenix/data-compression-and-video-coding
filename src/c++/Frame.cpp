@@ -153,11 +153,15 @@ public:
         bool u_skip = Y.rows != U.rows;
         bool v_skip = Y.rows != V.rows;
         cout << "starting decompression process 2\n";
+        
         if (debug){
-            cout << Y << endl;
-            cout << U << endl;
-            cout << V << endl;
+            cout << Y.at<int>(0,0) << endl;
+            cout << U.at<int>(0,0) << endl;
+            cout << V.at<int>(0,0) << endl;
         }
+
+        cout << "showed the shit\n";
+
         int predictor_y, predictor_u, predictor_v;
         for (int i = 0; i < height; i++)
         {
