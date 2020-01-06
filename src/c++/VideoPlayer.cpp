@@ -113,16 +113,17 @@ public:
                 counter += 1;
                 cout << "Decompressing frame: " << counter << "\n";
                 frame->set_frame_with_arr(array_of_nums);
+                cout << "set frame \n";
                 array_of_nums.erase(array_of_nums.begin(), array_of_nums.begin() + frame->get_limit());
                 array_of_nums.shrink_to_fit();
 
-                frame->decompress_frame(decompress_mode);
+                frame->decompress_frame(decompress_mode, counter > 1);
                 cout << "Finisheed decompressing frame, now moved on to write\n";
 
                 Mat M = frame->Y_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
-
+                
                 M = frame->U_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
@@ -130,7 +131,6 @@ public:
                 M = frame->V_frame();
                 M.convertTo(M, CV_8UC1);
                 write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
-                ~M;
 
                 write_stream << "FRAME\n";
 
@@ -146,7 +146,7 @@ public:
             gomby->decode_nums(&array_of_nums);
 
             frame->set_frame_with_arr(array_of_nums);
-            frame->decompress_frame(decompress_mode);
+            frame->decompress_frame(decompress_mode, false);
 
             Mat M = frame->Y_frame();
             M.convertTo(M, CV_8UC1);
@@ -159,7 +159,7 @@ public:
             M = frame->V_frame();
             M.convertTo(M, CV_8UC1);
             write_stream.write(M.ptr<char>(0), (M.dataend - M.datastart));
-            ~M;
+            
         }
 
         cout << "Finished decompressing frame \n";
@@ -214,7 +214,7 @@ public:
             for (int i = 0; i < M.rows; i++)
                 for (int j = 0; j < M.cols; j++)
                     bit_stream->add_to_bit_array(gomby->encode(M.at<int>(i, j)));
-            ~M;
+            
             bit_stream->write_bits(compress_path);
 
         }

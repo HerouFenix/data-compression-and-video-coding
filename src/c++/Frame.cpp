@@ -147,18 +147,18 @@ public:
         }
     }
 
-    void decompress_frame(char mode)
+    void decompress_frame(char mode, bool debug)
     {
+        cout << "starting decompression process\n";
         bool u_skip = Y.rows != U.rows;
         bool v_skip = Y.rows != V.rows;
-
+        cout << "starting decompression process 2\n";
+        
         int predictor_y, predictor_u, predictor_v;
-        cout << "starting decompression process\n";
         for (int i = 0; i < height; i++)
         {
             for (int j = 0; j < width; j++)
             {
-
                 if (mode == '1')
                 {
                     if (j > 0)
