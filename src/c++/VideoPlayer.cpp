@@ -259,18 +259,35 @@ public:
 
 int main()
 {
-    //VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");
-    //vp.compress_video("../../tests/vids/ducks_take_off.c4m", "JPEG-1");
-
-    VideoPlayer vp2("../../tests/vids/ducks_take_off.c4m");
-    vp2.decompress_video("ducks_take_off_c.y4m");
-    cout << "finshed compressing\n";
+    //Play Video
+    string file_name;
+    cout << "Insira o path para um ficheiro .y4m\n";
+    cin >> file_name;
+    VideoPlayer vp(file_name); // ../../tests/vids/ducks_take_off_1080p50.y4m
     
-    return 1;
+    //Compress Video
+    string compress_path;
+    cout << "Insira o path onde quer guardar o ficheiro comprimido (.c4m)\n";
+    cin >> compress_path;
 
-    //VideoPlayer vp("../../tests/vids/ducks_take_off_1080p50.y4m");
-    //vp.play_video();
-    //cout << vp.compress_video("../../tests/vids/ducks_take_off.c4m", "JPEG-L") << "\n";
+    string compress_type;
+    cout << "Insira o modo de compressão que quer usar (JPEG-1..7 ou JPEG-LS)\n";
+    cin >> compress_type;
+
+    vp.compress_video(compress_path, compress_type);
+
+    //Decompress Video
+    string decompress_name;
+    cout << "Insira o path para onde quer decomprimir o ficheiro (y4m)\n";
+    cin >> decompress_name;
+
+    VideoPlayer vp2(compress_path);
+    vp2.decompress_video(decompress_name);
+    cout << "finshed decompressing\n";
+
+    //Play Decompressed Video
+    VideoPlayer vp(decompress_name);
+    vp.play_video();
 
     return 0;
 }

@@ -60,7 +60,7 @@ class VideoCodec:
 
                     # Display the image with OpenCV
                     cv2.imshow('image', BGR)
-                    if cv2.waitKey() & 0xFF == ord('q'):
+                    if cv2.waitKey(25) & 0xFF == ord('q'):
                         break
 
                 except ValueError:
@@ -197,12 +197,30 @@ class VideoCodec:
             bit_stream.close(compress_path)
 
 if __name__ == "__main__":
-    #codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
-    #codec.play_video()
-    #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m","JPEG-2")
-    compressed_codec = VideoCodec("../../tests/vids/ducks_take_off.c4m")
-    #start_timer = time()
-    compressed_codec.decompress_video("ducks_take_off.y4m")
-    #print("It took ", time() - start_timer)
-    codec = VideoCodec("ducks_take_off.y4m")
+    file_name = input("Insira o path para um ficheiro .y4m\n")
+
+    #Play Video
+    codec = VideoCodec(file_name) #"../../tests/vids/ducks_take_off_1080p50.y4m"
     codec.play_video()
+    
+    #Compress Video
+    compress_path = input("Insira o path onde quer guardar o ficheiro comprimido (.c4m)\n")
+    compress_type = input("Insira o modo de compressão que quer usar (JPEG-1..7 ou JPEG-LS)\n")
+    
+    start_timer = time()
+    codec.compress_video(compress_path,compress_type)
+    print("It took ", time() - start_timer, " to Compress the video\n")
+
+
+    #Decompress Video
+    decompress_name = input("Insira o path para onde quer decomprimir o ficheiro (y4m)\n")
+
+    compressed_codec = VideoCodec(compress_path)
+    start_timer = time()
+    compressed_codec.decompress_video(decompress_name)
+    print("It took ", time() - start_timer, " to Decompress the video\n")
+    
+    #Play Decompressed Video
+    codec = VideoCodec(decompress_name)
+    codec.play_video()
+
