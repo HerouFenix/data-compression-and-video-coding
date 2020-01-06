@@ -163,3 +163,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Test folder
+tests/

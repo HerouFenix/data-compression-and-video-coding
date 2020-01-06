@@ -3,6 +3,7 @@ import cv2 as cv2
 from Frame import *
 from Golomb import Golomb
 from BitStream import BitStream
+from time import time
 
 
 class VideoCodec:
@@ -45,10 +46,7 @@ class VideoCodec:
             self.frame = Frame422(self.height, self.width)
         if self.frame_type == "444":
             self.frame = Frame444(self.height, self.width)
-        
-        self.test_y = None
-        self.test_u = None
-        self.test_v = None
+
 
     def play_video(self):
         with open(self.file_path, "rb") as stream:
@@ -102,9 +100,6 @@ class VideoCodec:
                     array_of_nums = self.frame.set_frame_by_array(array_of_nums)
                     y,u,v = self.frame.decompress_frame(self.decompress_mode)
 
-                    #read_stream.clear_padding()
-                    print("Stream offset at", read_stream.bit_offset)
-
                     write_stream.write(y.astype(np.uint8))
                     write_stream.write(u.astype(np.uint8))
                     write_stream.write(v.astype(np.uint8))
@@ -154,6 +149,7 @@ class VideoCodec:
 
 
             while True:
+                start_time = time()
                 if counter > 2:
                     break
                 counter += 1
@@ -165,13 +161,13 @@ class VideoCodec:
                     break
                 line = stream.readline()
                 self.frame.set_frame(stream)
-
+                start = time()
                 compressed_frame = self.frame.compress_frame(mode)
-                
+                print("Compressed in ", time() - start)
                 y = compressed_frame[0]
                 u = compressed_frame[1]
                 v = compressed_frame[2]
-
+    
                 number_of_numbers = 0
                 for x in np.nditer(y):
                     number_of_numbers += 1
@@ -181,7 +177,6 @@ class VideoCodec:
 
                 print("Finished compressing Y")
 
-                #bit_stream.reset_bit_array()
                 for x in np.nditer(u):
                     number_of_numbers += 1
 
@@ -191,21 +186,23 @@ class VideoCodec:
                 
                 print("Finished compressing U")
 
-                #bit_stream.reset_bit_array()
                 for x in np.nditer(v):
                     number_of_numbers += 1
                     bit_stream.add_to_bit_array(gomby.encode(int(x)))
                 
                 bit_stream.write_allbits(compress_path)
-                bit_stream.reset_bit_array()
-                print("Finished compressing Frame")
+
+                print("Finished compressing in", time() - start_time)
+            
+            bit_stream.close(compress_path)
 
 if __name__ == "__main__":
     codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.y4m")
     #codec.play_video()
-    codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m","JPEG-LS")
+    #codec.compress_video("../../tests/vids/ducks_take_off_1080p50.c4m","JPEG-2")
     compressed_codec = VideoCodec("../../tests/vids/ducks_take_off_1080p50.c4m")
+    start_timer = time()
     compressed_codec.decompress_video("ducks_take_off.y4m")
-
+    print("It took ", time() - start_timer)
     codec = VideoCodec("ducks_take_off.y4m")
     codec.play_video()
